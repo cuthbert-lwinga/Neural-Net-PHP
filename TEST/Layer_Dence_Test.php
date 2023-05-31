@@ -40,13 +40,32 @@ list($X, $y) =  np::spiral_data(100, 4);
 $Layer1 = new Layer_Dence(2,5);
 $Layer2 = new Layer_Dence(5,2);
 $Layer1->foward($X);
-$relu = new Activation_ReLU($Layer1->output);
-$relu->forward();
-$testOutput = Test::reluCheck($relu->output);
+$activation1 = new Activation_Relu($Layer1->output);
+$activation1->forward();
+$testOutput = Test::activation1Check($activation1->output);
 var_dump($testOutput);
 
 }
 
-TEST_2();
+function TEST_3(){
+list($X, $y) =  np::spiral_data(100, 3);
+$Layer1 = new Layer_Dence(2,3);
+$Layer1->foward($X);
+$activation1 = new Activation_Relu($Layer1->output);
+$activation1->forward();
+
+
+$Layer2 = new Layer_Dence(3,3);
+$Layer2->foward($activation1->output);
+$activation2 = new Activation_softMax($Layer2->output);
+$activation2->forward();
+
+
+var_dump($activation2->output);
+
+}
+
+
+TEST_3();
 
 ?>

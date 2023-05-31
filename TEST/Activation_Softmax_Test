@@ -1,0 +1,32 @@
+<?PHP
+include_once("../CLASSES/headers.php");
+use MathOperations as np; // simulating numpy from python 
+use TestOperations as Test; // For testing 
+
+$inputs = [
+    [4.8, 1.21, 2.385],
+    [8.9, -1.81, 0.2],
+    [1.41, 1.05, 0.026]
+];
+
+$softmax = new Activation_Softmax($inputs);
+$softmax->forward();
+$output = $softmax->output;
+
+// array(1) {
+//   [0]=>
+//   array(3) {
+//     [0]=>
+//     float(0.89528266395726185944425878915353678166866302490234375)
+//     [1]=>
+//     float(0.0247083067820993707019994189977296628057956695556640625)
+//     [2]=>
+//     float(0.08000902926063870046480275277644977904856204986572265625)
+//   }
+// }
+
+var_dump(($output));
+
+
+
+?>
