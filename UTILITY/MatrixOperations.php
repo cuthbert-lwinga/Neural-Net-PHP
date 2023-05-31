@@ -1,4 +1,5 @@
 <?PHP
+
 class MathOperations {
   
   // //  M    M   A   TTTTT  RRRRR   IIIII   X   X
@@ -35,6 +36,10 @@ public static function dot($matrix1, $matrix2) {
     }
     
     return $result;
+}
+
+public static function relu($input){
+    return max(0, $x);
 }
 
 public static function m_operator($matrix1, $operator, $value) {
@@ -228,6 +233,53 @@ private static function generateStandardNormalRandom() {
 
         return $z;
     }
+
+
+
+    public static function spiral_data($points, $classes) {
+    $X = array();
+    $y = array();
+    
+    for ($class_number = 0; $class_number < $classes; $class_number++) {
+        $ix = range($points * $class_number, $points * ($class_number + 1));
+        $r = MathOperations::linspace(0.0, 1, $points); // radius
+        $t = MathOperations::linspace($class_number * 4, ($class_number + 1) * 4, $points);
+        for ($i = 0; $i < $points; $i++) {
+            $t[$i] += MathOperations::randn() * 0.2;
+            $X[$ix[$i]] = array($r[$i] * sin($t[$i] * 2.5), $r[$i] * cos($t[$i] * 2.5));
+            $y[$ix[$i]] = $class_number;
+        }
+    }
+    
+    return array($X, $y);
+}
+
+
+public static function linspace($start, $end, $points) {
+    $interval = ($end - $start) / ($points - 1);
+    $range = [];
+    for ($i = 0; $i < $points; $i++) {
+        $range[] = $start + ($interval * $i);
+    }
+    return $range;
+}
+
+
+public static function randn($min = 0, $max = 1) {
+    $n = 1;
+    $m = 1;
+    $matrix = [];
+
+    for ($i = 0; $i < $n; $i++) {
+        $row = [];
+        for ($j = 0; $j < $m; $j++) {
+            $row[] = $min + mt_rand() / mt_getrandmax() * ($max - $min);
+        }
+        $matrix[] = $row;
+    }
+
+    return $matrix[0][0];
+}
 
 
 
