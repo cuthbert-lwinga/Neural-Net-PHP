@@ -27,7 +27,8 @@ $input = array(
   array(-1.5,2.7,3.3,-0.8)
 );
 
-// Layer done
+
+// Layer done OOP
 $Layer1 = new Layer_Dence(4,5);
 $Layer2 = new Layer_Dence(5,2);
 $Layer1->foward($input);
