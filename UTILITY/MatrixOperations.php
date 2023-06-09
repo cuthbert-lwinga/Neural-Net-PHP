@@ -38,9 +38,46 @@ public static function dot($matrix1, $matrix2) {
     return $result;
 }
 
+
+public static function applyThreshold($inputs,$threshold) {
+    $rows = count($inputs);
+    for ($i = 0; $i < $rows; $i++) {
+        $cols = count($inputs[$i]);
+        for ($j = 0; $j < $cols; $j++) {
+            if ($inputs[$i][$j] <= $threshold) {
+                $dinputs[$i][$j] = 0;
+            }else{
+                $dinputs[$i][$j] = 1;
+            }
+        }
+    }
+    return $dinputs;
+}
+
+
+public static function log($array) {
+    $result = array();
+    foreach ($array as $value) {
+        $result[] = log($value);
+    }
+    return $result;
+}
+
+
 public static function relu($input){
     return max(0, $x);
 }
+
+
+
+public static function multiply_scalar($array, $number) {
+    $result = array();
+    foreach ($array as $element) {
+        $result[] = $element * $number;
+    }
+    return $result;
+}
+
 
 public static function m_operator($matrix1, $operator, $value) {
     if (is_numeric($value)) {
@@ -169,6 +206,124 @@ public static function m_operator($matrix1, $operator, $value) {
     }
 
 
+    public static function clip($array, $minValue, $maxValue) {
+        foreach ($array as &$subarray) {
+            foreach ($subarray as &$value) {
+                $value = max(min($value, $maxValue), $minValue);
+            }
+        }
+        return $array;
+    }
+
+
+public static function sum($array, $axis = null) {
+    if ($axis === null) {
+        return array_sum(array_merge(...$array));
+    }
+
+    $result = [];
+    if ($axis === 0) {
+        foreach ($array[0] as $index => $value) {
+            $column = array_column($array, $index);
+            $result[] = array_sum($column);
+        }
+    } elseif ($axis === 1) {
+        foreach ($array as $row) {
+
+            var_dump($row);
+            echo "\n-----------\n";
+
+            $result[] = array_sum($row);
+        }
+    }
+
+    return $result;
+}
+
+
+    public static function extract_matrix_one_hot_encoded($matrix,$encode){
+        $return = array();
+        $matrix_count = count($matrix);
+        if ($matrix_count!=count($encode)) {
+            die("one_hot_encoding_linear: length of matrix and hot encoding linear array don't match");
+        }
+
+        for ($i = 0; $i < $matrix_count; $i++) {
+            $max = $matrix[$i];
+            $index = array_search(1,$encode[$i]);
+
+            if (!empty($index)){
+                if ($index>=0&&$index<count($max)) {
+                    $return[] = $matrix[$i][$index]; 
+                }else{
+                die("one_hot_encoding_linear: index out of bound");
+            }
+            }else{
+                die("one_hot_encoding_linear: not hot encoded found AKA: no 1 found @ encode[$i]");
+            }
+        } 
+
+        return $return;   
+    }
+
+
+    public static function argmax($matrix){
+        $return = array();
+        $matrix_count = count($matrix);
+        for ($i = 0; $i < $matrix_count; $i++) {
+            $row = $matrix[$i];
+            $return[] = array_search(max($row),$row);
+        } 
+        return $return;   
+    }
+
+
+    public static function accuracy($matrix,$true_values){
+        $correct = 0;
+        $matrix_count = count($matrix);
+        $prediction =MathOperations::argmax($matrix);
+        for ($i = 0; $i < $matrix_count; $i++) {
+            if ($prediction[$i]==$true_values[$i]) {
+                $correct++;
+            }
+        } 
+        return $correct/$matrix_count;   
+    }
+
+
+public static function eye($n) {
+    $eye = array();
+    for ($i = 0; $i < $n; $i++) {
+        $row = array();
+        for ($j = 0; $j < $n; $j++) {
+            $row[] = ($i === $j) ? 1 : 0;
+        }
+        $eye[] = $row;
+    }
+    return $eye;
+}
+
+
+      public static function extract_matrix_by_scalar($matrix,$encode){
+        $return = array();
+        $matrix_count = count($matrix);
+        if ($matrix_count!=count($encode)) {
+            die("extract_matrix_by_scalar: length of matrix and hot encoding linear array don't match");
+        }
+
+        for ($i = 0; $i < $matrix_count; $i++) {
+            $max = $matrix[$i];
+            if ($encode[$i]>=0&&$encode[$i]<count($max)) {
+                // code...
+                $return[] = $matrix[$i][$encode[$i]]; 
+            }else{
+                die("extract_matrix_by_scalar: index out of bound");
+            }
+        } 
+
+        return $return;   
+    } 
+
 
     public static function luDecomp($matrix) {
     $n = count($matrix);
@@ -222,6 +377,27 @@ public static function m_operator($matrix1, $operator, $value) {
 
 
 /// Other Functions 
+
+
+public static function checkArrayShape($array) {
+    if (!is_array($array)) {
+        return 0;
+    }
+    
+    $shape = 0;
+    $currentLevel = 1;
+    
+    while (is_array($array)) {
+        $shape = max($shape, $currentLevel);
+        
+        $firstElement = reset($array);
+        $array = is_array($firstElement) ? $firstElement : null;
+        $currentLevel++;
+    }
+    
+    return $shape;
+}
+
 
 
 private static function generateStandardNormalRandom() {

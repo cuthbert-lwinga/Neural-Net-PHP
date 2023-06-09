@@ -12,34 +12,28 @@ $input = array(
 );
 
 
-
-
-
-
-
-
 // // Display the data
 // for ($i = 0; $i < count($X); $i++) {
 //     echo "X[$i]: " . implode(', ', $X[$i]) . " - y[$i]: " . $y[$i] . "\n";
 // }
 
 function TEST_1(){
-$Layer1 = new Layer_Dence(2,5);
-$Layer2 = new Layer_Dence(5,2);
-$Layer1->foward($input);
-$Layer2->foward($Layer1->output);
+$Layer1 = new Layer_Dense(2,5);
+$Layer2 = new Layer_Dense(5,2);
+$Layer1->forward($input);
+$Layer2->forward($Layer1->output);
 
 var_dump($Layer2->output);
-//$Layer2->foward($input);
+//$Layer2->forward($input);
 
 }
 
 
 function TEST_2(){
 list($X, $y) =  np::spiral_data(100, 4);
-$Layer1 = new Layer_Dence(2,5);
-$Layer2 = new Layer_Dence(5,2);
-$Layer1->foward($X);
+$Layer1 = new Layer_Dense(2,5);
+$Layer2 = new Layer_Dense(5,2);
+$Layer1->forward($X);
 $activation1 = new Activation_Relu($Layer1->output);
 $activation1->forward();
 $testOutput = Test::activation1Check($activation1->output);
@@ -49,23 +43,53 @@ var_dump($testOutput);
 
 function TEST_3(){
 list($X, $y) =  np::spiral_data(100, 3);
-$Layer1 = new Layer_Dence(2,3);
-$Layer1->foward($X);
+
+//var_dump($y);
+
+$Layer1 = new Layer_Dense(2,3);
+$Layer1->forward($X);
 $activation1 = new Activation_Relu($Layer1->output);
 $activation1->forward();
 
 
-$Layer2 = new Layer_Dence(3,3);
-$Layer2->foward($activation1->output);
+$Layer2 = new Layer_Dense(3,3);
+$Layer2->forward($activation1->output);
 $activation2 = new Activation_softMax($Layer2->output);
 $activation2->forward();
 
 
-var_dump($activation2->output);
+//var_dump($activation2->output);
+
+}
+
+function TEST_4(){
+  $input = array(
+  array(1, 2, 3,2.5),
+  array(2.0,5.0, -1.0, 2.0),
+  array(-1.5,2.7,3.3,-0.8)
+);
+$Layer1 = new Layer_Dense(4,3);
+$Layer2 = new Layer_Dense(5,2);
+$Layer1->forward($input);
+
+$dvalues = array(
+    array(1.0, 1.0, 1.0),
+    array(2.0, 2.0, 2.0),
+    array(-3.0, -3.0, -3.0)
+);
+
+$Layer1->backward($dvalues);
+
+$activation1 = new Activation_Relu($Layer1->output);
+$activation1->forward();
+
+$activation1->backward($dvalues);
+//$Layer2->forward($Layer1->output);
 
 }
 
 
-TEST_3();
+
+TEST_4();
 
 ?>

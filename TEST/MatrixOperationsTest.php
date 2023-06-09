@@ -14,7 +14,8 @@ $data_hori  = np::transform($data_hori);
 
 $data = array(
   array(1, 2, 3),
-  array(4, 5, 6)
+  array(4, 5, 6),
+  array(1, 2, 3)
 );
 
 $data2 = array(
@@ -24,17 +25,23 @@ $data2 = array(
 );
 
 
+
+
+var_dump($eye);
+// $dot = np::argmax($data2);
+// var_dump($dot);
+
 //$dot = np::dot($data,$zerosMatrix);
 //$dot = np::m_operator($dot,"+",0);
 //$dot = np::rand(4,5,-0.1,0.1);
 
 
 //$result1 = np::m_operator($data, '+', 2); // Add 2 to each element of matrix1
-$result2 = np::m_operator($data2, '+', $data_hori); // Perform element-wise subtraction between matrix1
+//$result2 = np::m_operator($data2, '+', $data_hori); // Perform element-wise subtraction between matrix1
 
 
 
-var_dump($zerosMatrix)
+//var_dump($zerosMatrix)
 // $data = array(
 //   array(1, 2, 3),
 //   array(4, 5, 6)

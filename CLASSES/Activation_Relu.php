@@ -7,6 +7,8 @@ use TestOperations as Test; // For testing
 class Activation_Relu{
 	public $inputs;
 	public $output;
+    public $input;
+    public $dinput;
 	function __construct($input){
 		$this->inputs = $input;
 	}
@@ -28,6 +30,13 @@ class Activation_Relu{
 
         return $output;
     }
+
+    public function backward($dvalues) {
+        $this->dinput = $dvalues;
+        $this->dinput = np::applyThreshold($this->dinput,0);
+    }
+
+
 }
 
 
