@@ -25,8 +25,6 @@ public function forward($y_pred, $y_true) {
         $samples = count($y_pred);
         $y_pred_clipped = np::clip($y_pred,1e-7,1-1e-7); // to not have infinity numbers
 
-
-
         if (np::checkArrayShape($y_true)==1) {
         	$correct_confidence = np::extract_matrix_by_scalar($y_pred_clipped,$y_true);	
         }else{
@@ -48,23 +46,19 @@ function backward($dvalues, $y_true) {
 
     // If labels are sparse, turn them into one-hot vector
     if (np::checkArrayShape($y_true)==1) {
-        $y_true = np::eye($labels)[$y_true];
+        $y_true = np::np_eye_index($labels,$y_true);//;np::eye($labels)[$y_true];
     }
 
     // Calculate gradient
-    $dinputs = [];
-    for ($i = 0; $i < $samples; $i++) {
-        $row = [];
-        for ($j = 0; $j < $labels; $j++) {
-            $row[] = -$y_true[$i][$j] / $dvalues[$i][$j];
-        }
-        $dinputs[] = $row;
-    }
+    
+    $temp = np::m_operator($y_true,"x",-1);
 
-    // Normalize gradient
-    $dinputs = multiplyArray($dinputs, 1 / $samples);
+    $dinputs = np::m_operator($temp,"/",$dvalues);
 
-    $this->dinputs = $dinputs;
+
+    $this->dinputs = np::m_operator($dinputs,"x",(1 / $samples));
+    
+    //$this->dinputs = $dinputs;
 }
 
 
@@ -75,29 +69,7 @@ function backward($dvalues, $y_true) {
         return $data_loss;
     }
 }
-// Test code
-//$X = spiral_data($samples = 100, $classes = 3);
-// list($X, $y) =  np::spiral_data(100, 3);
-// $dense1 = new Layer_Dense(2, 3);
-// $dense1->foward($X);
 
-// $activation1 = new Activation_ReLU($dense1->output);
-
-// $dense2 = new Layer_Dense(3, 3);
-// $dense2->foward($activation1->output);
-
-// $activation2 = new Activation_Softmax($dense2->output);
-// $activation2->foward($dense2->output);
-
-
-
-// echo "Output:\n";
-// print_r(array_slice($activation2->output, 0, 5));
-
-// $loss_function = new Loss_CategoricalCrossentropy();
-// $loss = $loss_function->calculate($activation2->output, $y);
-
-// echo "Loss: " . $loss . "\n";
 
 
 

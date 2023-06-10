@@ -75,7 +75,7 @@ $Layer1->forward($input);
 $dvalues = array(
     array(1.0, 1.0, 1.0),
     array(2.0, 2.0, 2.0),
-    array(-3.0, -3.0, -3.0)
+    array(3.0, 3.0, 3.0)
 );
 
 $Layer1->backward($dvalues);
@@ -88,8 +88,51 @@ $activation1->backward($dvalues);
 
 }
 
+function TEST_5(){
+list($X, $y) =  np::spiral_data(100, 3);
+
+//var_dump($y);$temp = np::diagflat($this->output);
+
+$Layer1 = new Layer_Dense(2,3);
+$Layer1->forward($X);
+$activation1 = new Activation_Relu($Layer1->output);
+$activation1->forward();
 
 
-TEST_4();
+$Layer2 = new Layer_Dense(3,3);
+$Layer2->forward($activation1->output);
+$activation2 = new Activation_softMax($Layer2->output);
+$activation2->forward();
+$activation2->backward(array(array(1,2,3,4,5,6)));
+}
+
+function TEST_6(){
+    $input = array(
+  array(1, 2, 3,2.5),
+  array(2.0,5.0, -1.0, 2.0),
+  array(-1.5,2.7,3.3,-0.8)
+);
+$dvalues = array(
+    array(1.0, 1.0, 1.0),
+    array(2.0, 2.0, 2.0),
+    array(3.0, 3.0, 3.0)
+);
+//var_dump($y);$temp = np::diagflat($this->output);
+
+$Layer1 = new Layer_Dense(4,3);
+$Layer1->forward($input);
+$activation1 = new Activation_Relu($Layer1->output);
+$activation1->forward();
+
+
+// $Layer2 = new Layer_Dense(3,2);
+// $Layer2->forward($activation1->output);
+$activation2 = new Activation_softMax($Layer1->output);
+$activation2->forward();
+$activation2->backward($dvalues);
+}
+
+
+TEST_6();
 
 ?>

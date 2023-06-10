@@ -68,6 +68,82 @@ public static function relu($input){
     return max(0, $x);
 }
 
+public static function empty_like($array) {
+    $emptyArray = array();
+
+    // Iterate over the dimensions of the $array
+    foreach ($array as $dimension) {
+        $emptyArray[] = array_fill(0, count($dimension), null);
+    }
+
+    return $emptyArray;
+}
+
+public static function JacobianMatrix($input) {
+        $inputMatrix = MathOperations::reshape($input, [1, count($input)]);
+        $flattened = MathOperations::diagflat($input);
+        $dot = MathOperations::dot($inputMatrix,MathOperations::transform($inputMatrix));
+        $temp = MathOperations::m_operator($flattened, "-", $dot);
+        return $temp;
+
+}
+public static function diagflat($input) {
+    // Get the length of the input array
+    $length = count($input);
+    
+    // Create an empty 2-D array
+    $result = [];
+    
+    // Fill the array with zeros
+    for ($i = 0; $i < $length; $i++) {
+        $result[$i] = [];
+        for ($j = 0; $j < $length; $j++) {
+            $result[$i][$j] = 0;
+        }
+    }
+    
+    // Set the input values along the diagonal
+    for ($i = 0; $i < $length; $i++) {
+        $result[$i][$i] = $input[$i];
+    }
+    
+    return $result;
+}
+
+public static function flattenArray($input) {
+  $result = [];
+
+  foreach ($input as $item) {
+    $result[] = $item[0];
+  }
+
+  return $result;
+}
+
+
+public static function reshape($array, $shape) {
+    // Calculate the total number of elements in the array
+    $totalElements = array_product($shape);
+
+    // Check if the total number of elements matches the array size
+    if (count($array) !== $totalElements) {
+        throw new Exception('Total number of elements does not match the array size.');
+    }
+
+    // Reshape the array
+    $reshapedArray = array_chunk($array, $shape[1]);
+
+    // Transpose the reshaped array
+    $reshapedArray = array_map(null, ...$reshapedArray);
+
+    if ($shape[0]==1) {
+        for ($i=0; $i < count($reshapedArray); $i++) { 
+            $reshapedArray[$i] = [$reshapedArray[$i]];
+        }
+    }
+
+    return $reshapedArray;
+}
 
 
 public static function multiply_scalar($array, $number) {
@@ -89,6 +165,8 @@ public static function m_operator($matrix1, $operator, $value) {
                     $element -= $value; // Subtraction
                 } elseif ($operator === '/') {
                     $element /= $value; // Division
+                } elseif ($operator === 'x') {
+                    $element *= $value; // Division
                 } else {
                     die("Error: Invalid operator. Only '+', '-', and '/' operators are supported.");
                 }
@@ -132,8 +210,10 @@ public static function m_operator($matrix1, $operator, $value) {
                         $matrix1[$i][$j] += $matrix2[$i][$j]; // Element-wise addition
                     } elseif ($operator === '-') {
                         $matrix1[$i][$j] -= $matrix2[$i][$j]; // Element-wise subtraction
+                    } elseif ($operator === '/') {
+                        $matrix1[$i][$j] /= $matrix2[$i][$j]; // Element-wise subtraction
                     } else {
-                        die("Error: Invalid operator. Only '+' and '-' operators are supported.");
+                        die("Error: Invalid operator. Only '+', '-' and '/' operators are supported.");
                     }
                 }
             }
@@ -141,7 +221,7 @@ public static function m_operator($matrix1, $operator, $value) {
             die("Error: Invalid value. Value must be a numeric scalar or a matrix.");
         }
     
-    return $matrix;
+    return $matrix1;
 }
 
 
@@ -230,8 +310,7 @@ public static function sum($array, $axis = null) {
     } elseif ($axis === 1) {
         foreach ($array as $row) {
 
-            var_dump($row);
-            echo "\n-----------\n";
+    
 
             $result[] = array_sum($row);
         }
@@ -240,6 +319,15 @@ public static function sum($array, $axis = null) {
     return $result;
 }
 
+    public static function np_eye_index($labels, $y_true)
+{
+    $eyeMatrix = MathOperations::eye($labels);
+    $result = array();
+    foreach ($y_true as $index) {
+        $result[] = $eyeMatrix[$index];
+    }
+    return $result;
+}
 
     public static function extract_matrix_one_hot_encoded($matrix,$encode){
         $return = array();
@@ -265,6 +353,14 @@ public static function sum($array, $axis = null) {
 
         return $return;   
     }
+
+    public static function subtractFromDInputs($dinputs, $y_true,$value) {
+  for ($i = 0; $i < count($y_true); $i++) {
+    //echo count($dvalues)." = ".count($y_true);
+    $dinputs[$i][$y_true[$i]] -= $value;
+  }
+  return $dinputs;
+}
 
 
     public static function argmax($matrix){

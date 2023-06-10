@@ -7,9 +7,11 @@ use TestOperations as Test; // For testing
 class Activation_Softmax {
     public $output;
     public $inputs;
-function __construct($inputs){
-	$this->inputs = $inputs;
-}
+    public $dinputs;
+    
+    function __construct($inputs=array()){
+    	$this->inputs = $inputs;
+    }
 
     public function forward() {
     	$inputs = $this->inputs;
@@ -37,6 +39,18 @@ function __construct($inputs){
         
         $this->output = $probabilities;
     }
+
+
+    public function backward($dinput){
+        $this->dinputs = np::empty_like($dinput);
+        for ($i=0; $i < count($this->output); $i++) { 
+            $jb = (np::JacobianMatrix($this->output[$i])); 
+            $temp = np::flattenArray(np::dot($jb,np::reshape($dinput[$i],[1, count($dinput[$i])])));
+            $this->dinputs[$i] = $temp;
+        }
+    }
+
+
 }
 
 

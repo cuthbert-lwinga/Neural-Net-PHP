@@ -75,7 +75,7 @@ $best_dense3_biases = [];
 
 
 
-for($i = 0;$i < 100000000; $i++){
+for($i = 0;$i < 1000; $i++){
   $Layer1 = new Layer_Dense(2,3);
   $Layer2 = new Layer_Dense(3,3);  
   $Layer1->forward($X);
@@ -111,7 +111,7 @@ for($i = 0;$i < 100000000; $i++){
 
 }
 
-  echo "done";
+  echo "\n done \n";
 //var_dump($activation2->output);
 
 

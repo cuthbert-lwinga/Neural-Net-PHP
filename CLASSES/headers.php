@@ -7,5 +7,6 @@ include_once("Activation_Softmax.php");
 include_once("Layer_Dence.php");
 include_once("Loss.php");
 include_once("Loss_CategoricalCrossentropy.php");
+include_once("Activation_Softmax_Loss_CategoricalCrossentropy.php");
 
 ?>

@@ -33,7 +33,7 @@ class Activation_Relu{
 
     public function backward($dvalues) {
         $this->dinput = $dvalues;
-        $this->dinput = np::applyThreshold($this->dinput,0);
+        $this->dinput = np::applyThreshold($this->dinput,0); #Equivalent to self.dinput[self.dinput<=0] = 0
     }
 
 
