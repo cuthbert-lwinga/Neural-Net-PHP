@@ -73,14 +73,24 @@ $best_dense1_biases = [];
 $best_dense2_weights = [];
 $best_dense3_biases = [];
 
-
-
-for($i = 0;$i < 1000; $i++){
   $Layer1 = new Layer_Dense(2,3);
-  $Layer2 = new Layer_Dense(3,3);  
+  $Layer2 = new Layer_Dense(3,3);
+  $activation1 = new Activation_Relu();
+
+for($i = 0;$i < 100000; $i++){
+
+  //echo "shape ".np::shape($Layer1->weights)." ";
+  $Layer1->weights = np::m_operator($Layer1->weights ,"+",np::m_operator(np::rand(2,3,0,1),"x",0.05));
+
+  $Layer1->biases = np::m_operator($Layer1->biases ,"+",(np::m_operator(np::rand(1,3,0,1),"x",0.05)));
+
+  $Layer2->weights = np::m_operator($Layer2->weights,"+",(np::m_operator(np::rand(3,3,0,1),"x",0.05)));
+  
+  $Layer2->biases = np::m_operator($Layer1->biases ,"+",(np::m_operator(np::rand(1,3,0,1),"x",0.05)));
+
+  
   $Layer1->forward($X);
-  $activation1 = new Activation_Relu($Layer1->output);
-  $activation1->forward();
+  $activation1->forward($Layer1->output);
   
   $Layer2->forward($activation1->output);
   $activation2 = new Activation_softMax($Layer2->output);
@@ -101,10 +111,10 @@ for($i = 0;$i < 1000; $i++){
   $lowes_loss = $loss;
   }else{
     //echo "nop iteration: $i, loss: $loss\n";
-  $best_dense1_weights = $Layer1->weights;
-  $best_dense1_biases = $Layer1->biases;
-  $best_dense2_weights = $Layer2->weights;
-  $best_dense2_biases = $Layer2->biases;
+  $Layer1->weights = $best_dense1_weights;
+  $Layer1->biases = $best_dense1_biases;
+  $Layer2->weights = $best_dense2_weights;
+  $Layer2->biases = $best_dense2_biases;
   }
 
 

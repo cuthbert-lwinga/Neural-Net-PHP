@@ -30,7 +30,6 @@ public function forward($y_pred, $y_true) {
         }else{
         	$correct_confidence = np::extract_matrix_one_hot_encoded($y_pred_clipped,$y_true);
         }
-
         $negavtive_log_likelyhood = np::log($correct_confidence);
         $negavtive_log_likelyhood = np::multiply_scalar($negavtive_log_likelyhood,-1);
 

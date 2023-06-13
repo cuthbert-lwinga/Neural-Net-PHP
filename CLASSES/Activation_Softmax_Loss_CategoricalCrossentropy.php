@@ -16,7 +16,7 @@ class Activation_Softmax_Loss_CategoricalCrossentropy{
 		$this->activation->inputs = $inputs;
 		$this->activation->forward();
 		$this->output = $this->activation->output;
-		return this->loss->calculate($this->output,$y_true);
+		return $this->loss->calculate($this->output,$y_true);
 	}
 
 function backward($dvalues, $y_true) {

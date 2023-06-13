@@ -9,11 +9,12 @@ class Activation_Relu{
 	public $output;
     public $input;
     public $dinput;
-	function __construct($input){
+	function __construct($input=array()){
 		$this->inputs = $input;
 	}
 
-    public function forward() {
+    public function forward($input=array()) {
+        $this->inputs = $input;
         $output = [];
         foreach ($this->inputs as $input) {
             $output[] = $this->reluActivation($input);
@@ -33,7 +34,11 @@ class Activation_Relu{
 
     public function backward($dvalues) {
         $this->dinput = $dvalues;
+        //echo "before \n\n"; 
+        //np::printMatrix($this->dinput,5);
         $this->dinput = np::applyThreshold($this->dinput,0); #Equivalent to self.dinput[self.dinput<=0] = 0
+        //echo "after \n\n";
+        //np::printMatrix($this->dinput,5);
     }
 
 

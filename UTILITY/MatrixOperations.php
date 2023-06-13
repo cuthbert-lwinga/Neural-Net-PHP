@@ -12,14 +12,15 @@ class MathOperations {
   // Function to perform dot product between two matrices
 public static function dot($matrix1, $matrix2) {
     $result = array();
-    
-    $n1 = count($matrix1);
-    $m1 = count($matrix1[0]);
-    $n2 = count($matrix2);
-    $m2 = count($matrix2[0]);
-    
+    $matrix1_shape = MathOperations::shape($matrix1);
+    $matrix2_shape = MathOperations::shape($matrix2);
+    $n1 = count($matrix1);// rows for matrix1
+    $m1 = count($matrix1[0]);// cols for matrix1
+    $n2 = count($matrix2); // rows for matrix2
+    $m2 = count($matrix2[0]);// cols for matrix2
+    //if ($m1 != $n2)
     if ($m1 != $n2) {
-        echo "Error: Incompatible matrix sizes for dot product.";
+        echo "Error: Incompatible matrix sizes for dot product. Attempting $matrix1_shape . $matrix2_shape\n";
         return $result;
     }
     
@@ -40,19 +41,23 @@ public static function dot($matrix1, $matrix2) {
 
 
 public static function applyThreshold($inputs,$threshold) {
-    $rows = count($inputs);
+        $rows = count($inputs);
+
+$dinputs = []; // Initialize the $dinputs array
+
     for ($i = 0; $i < $rows; $i++) {
         $cols = count($inputs[$i]);
         for ($j = 0; $j < $cols; $j++) {
             if ($inputs[$i][$j] <= $threshold) {
                 $dinputs[$i][$j] = 0;
-            }else{
-                $dinputs[$i][$j] = 1;
+            } else {
+                $dinputs[$i][$j] = $inputs[$i][$j];
             }
         }
     }
     return $dinputs;
 }
+
 
 
 public static function log($array) {
@@ -201,7 +206,14 @@ public static function m_operator($matrix1, $operator, $value) {
             }
 
             if ($n1 !== $n2 || $m1 !== $m2) {
-                die("Error: Incompatible matrix sizes for element-wise operation.");
+                // Perfom padding
+       
+                if($n2<$n1){
+                    $matrix2 = MathOperations::padMatrix($matrix1,$n1);
+                    return MathOperations::m_operator($matrix1, $operator,$matrix1);
+                }else{
+                    die("Error: Incompatible matrix sizes for element-wise operation.");
+                }
             }
 
             for ($i = 0; $i < $n1; $i++) {
@@ -218,15 +230,55 @@ public static function m_operator($matrix1, $operator, $value) {
                 }
             }
         } else {
-            die("Error: Invalid value. Value must be a numeric scalar or a matrix.");
+
+
+            if(is_array($value)){
+
+                $matrix2 = array();
+                $matrix2[] = $value;
+                $n1 = count($matrix1); // number of rows
+                $m1 = count($matrix1[0]); // number of cols
+                $n2 = count($matrix2); // number of rows
+                $m2 = count($matrix2[0]); // number of co
+
+                if($n2<$n1){
+                    $matrix2 = MathOperations::padMatrix($matrix1,$n1);
+               
+                    return MathOperations::m_operator($matrix1, $operator,$matrix1);
+                }else{
+                    die("Error: Incompatible matrix sizes for element-wise operation.");
+                }
+
+            }else{
+                        echo "Error: Invalid value. Value must be a numeric scalar or a matrix. while performing $operator by $value";
+            
+                        MathOperations::printMatrix($matrix1,5);
+                        die();
+                    }
         }
     
     return $matrix1;
 }
 
 
+private static function padMatrix($array, $numRows) {
+    $result = array();
+    
+    for ($i = 0; $i < $numRows; $i++) {
+        $result[] = $array;
+    }
+    
+    return $result;
+}
 
       private static function isMatrix($matrix) {
+        if(!is_array($matrix)){
+            return false;
+        }
+
+        if(!is_array($matrix[0])){
+                    return false;
+        }
         $numRows = count($matrix);
         $numCols = count($matrix[0]);
 
@@ -319,6 +371,49 @@ public static function sum($array, $axis = null) {
     return $result;
 }
 
+
+public static function printMatrix($matrix, $limit = null)
+{
+    if (!is_array($matrix)) {
+        echo "Invalid matrix format.";
+        return;
+    }
+
+    if (!is_array($matrix[0])) {
+        // code...
+        $matrix = MathOperations::padMatrix($matrix, 1);
+    }
+
+    $rows = count($matrix);
+    $columns = 0;
+
+    if ($rows > 0) {
+        $columns = count($matrix[0]);
+    }
+
+    if ($limit !== null) {
+        $rows = min($rows, $limit);
+        $columns = min($columns, $limit);
+    }
+
+    for ($i = 0; $i < $rows; $i++) {
+        echo '[';
+        for ($j = 0; $j < $columns; $j++) {
+            if (is_array($matrix[$i][$j])) {
+                echo '[' . implode(', ', $matrix[$i][$j]) . ']';
+            } else {
+                echo $matrix[$i][$j];
+            }
+            if ($j < $columns - 1) {
+                echo ', ';
+            }
+        }
+        echo ']' . PHP_EOL;
+    }
+}
+
+
+
     public static function np_eye_index($labels, $y_true)
 {
     $eyeMatrix = MathOperations::eye($labels);
@@ -360,6 +455,31 @@ public static function sum($array, $axis = null) {
     $dinputs[$i][$y_true[$i]] -= $value;
   }
   return $dinputs;
+}
+
+public static function max($inputs, $axis, $keepdims = true)
+{
+    $result = [];
+
+    if ($axis === 0) {
+        $size = count($inputs);
+        $cols = count($inputs[0]);
+
+        for ($j = 0; $j < $cols; $j++) {
+            $column = array_column($inputs, $j);
+            $result[] = max($column);
+        }
+    } elseif ($axis === 1) {
+        foreach ($inputs as $row) {
+            $result[] = max($row);
+        }
+    }
+
+    if (!$keepdims) {
+        $result = array_values($result);
+    }
+
+    return $result;
 }
 
 
@@ -494,6 +614,16 @@ public static function checkArrayShape($array) {
     return $shape;
 }
 
+public static function shape($array) {
+    if (!is_array($array)) {
+        return "Invalid input: Not an array.";
+    }
+    
+    $rows = count($array);
+    $cols = count($array[0]);
+    
+    return "($rows, $cols)";
+}
 
 
 private static function generateStandardNormalRandom() {

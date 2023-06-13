@@ -13,7 +13,11 @@ class Activation_Softmax {
     	$this->inputs = $inputs;
     }
 
-    public function forward() {
+    public function forward($inputs=null) {
+        if ($inputs!=null) {
+            $this->inputs = $inputs;
+        }
+
     	$inputs = $this->inputs;
         $maxInputs = array_map('max', $inputs);
         $maxInputs = array_map(function ($value) {
@@ -38,6 +42,11 @@ class Activation_Softmax {
         }, $expValues, $sumExpValues);
         
         $this->output = $probabilities;
+
+        // new 
+
+
+
     }
 
 

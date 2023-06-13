@@ -12,9 +12,9 @@ class Layer_Dense{
 	public $dbiases;
 	public $doutput;
 	function __construct($n_inputs,$n_neurons){
-		$this->weights = np::rand($n_inputs,$n_neurons,-0.1,0.1);
-		$zerosMatrix = np::zeros($n_neurons,1); //. createing a spae of (1,n_neurons)
-		$this->biases  = $zerosMatrix;//np::transform($zerosMatrix);
+		$this->weights = np::m_operator(np::rand($n_inputs,$n_neurons,0,1),"x",0.01);
+		$zerosMatrix = np::zeros(1,$n_neurons);
+		$this->biases  = $zerosMatrix;
 	}
 
 	public function forward($input){
@@ -27,10 +27,15 @@ class Layer_Dense{
 	  // Gradients on parameters
 	  $this->dweights = np::dot(np::transform($this->inputs), $dvalues);
 	  $this->dbiases = np::sum($dvalues,0);
-	  $this->dinputs = np::dot($dvalues, np::transform($this->weights));
+	  $transformedWeights = np::transform($this->weights);
+	  $this->dinputs = np::dot($dvalues,$transformedWeights);
 	}
 
 }
-
+function calculate_sum_shape($array, $axis) {
+    $sum = array_sum($array, $axis);
+    $shape = array_map('count', $sum);
+    return implode(',', $shape);
+}
 
 ?>
