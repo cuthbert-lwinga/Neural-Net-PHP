@@ -77,7 +77,7 @@ $best_dense3_biases = [];
   $Layer2 = new Layer_Dense(3,3);
   $activation1 = new Activation_Relu();
 
-for($i = 0;$i < 100000; $i++){
+for($i = 0;$i < 10000; $i++){
 
   //echo "shape ".np::shape($Layer1->weights)." ";
   $Layer1->weights = np::m_operator($Layer1->weights ,"+",np::m_operator(np::rand(2,3,0,1),"x",0.05));

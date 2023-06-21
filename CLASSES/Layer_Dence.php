@@ -11,8 +11,10 @@ class Layer_Dense{
 	public $dweights;
 	public $dbiases;
 	public $doutput;
+	public $weight_momentums = NULL;
+	public $bias_momentums = NULL;
 	function __construct($n_inputs,$n_neurons){
-		$this->weights = np::m_operator(np::rand($n_inputs,$n_neurons,0,1),"x",0.01);
+		$this->weights = np::m_operator(np::rand($n_inputs,$n_neurons,-1,1),"x",0.01);
 		$zerosMatrix = np::zeros(1,$n_neurons);
 		$this->biases  = $zerosMatrix;
 	}
@@ -25,17 +27,17 @@ class Layer_Dense{
 
 	public function backward($dvalues) {
 	  // Gradients on parameters
-	  $this->dweights = np::dot(np::transform($this->inputs), $dvalues);
-	  $this->dbiases = np::sum($dvalues,0);
-	  $transformedWeights = np::transform($this->weights);
-	  $this->dinputs = np::dot($dvalues,$transformedWeights);
+		$this->dweights = np::dot(np::transform($this->inputs), $dvalues);
+		$this->dbiases = array(np::sum($dvalues,0));
+		$transformedWeights = np::transform($this->weights);
+		$this->dinputs = np::dot($dvalues,$transformedWeights);
 	}
 
 }
 function calculate_sum_shape($array, $axis) {
-    $sum = array_sum($array, $axis);
-    $shape = array_map('count', $sum);
-    return implode(',', $shape);
+	$sum = array_sum($array, $axis);
+	$shape = array_map('count', $sum);
+	return implode(',', $shape);
 }
 
 ?>

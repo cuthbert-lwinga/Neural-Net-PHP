@@ -25,7 +25,7 @@ class Activation_Relu{
     private function reluActivation($input) {
         $output = [];
         foreach ($input as $value) {
-            $maxFound = max(0,$value);;
+            $maxFound = max(0,$value);
             $output[] = $maxFound;
         }
 
@@ -34,11 +34,7 @@ class Activation_Relu{
 
     public function backward($dvalues) {
         $this->dinput = $dvalues;
-        //echo "before \n\n"; 
-        //np::printMatrix($this->dinput,5);
-        $this->dinput = np::applyThreshold($this->dinput,0); #Equivalent to self.dinput[self.dinput<=0] = 0
-        //echo "after \n\n";
-        //np::printMatrix($this->dinput,5);
+        $this->dinput = $this->reluActivation($this->dinput);//np::applyThreshold($this->dinput,0); #Equivalent to self.dinput[self.dinput<=0] = 0
     }
 
 

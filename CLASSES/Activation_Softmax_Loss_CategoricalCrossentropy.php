@@ -2,7 +2,7 @@
 include_once("../CLASSES/headers.php");
 use MathOperations as np; // simulating numpy from python 
 use TestOperations as Test; // For testing 
-class Activation_Softmax_Loss_CategoricalCrossentropy{
+class Activation_Softmax_Loss_CategoricalCrossentropy extends Loss{
 	public $activation;
 	public $loss;
 	public $output;
@@ -13,10 +13,11 @@ class Activation_Softmax_Loss_CategoricalCrossentropy{
 	}
 
 	public function forward($inputs, $y_true) {
-		$this->activation->inputs = $inputs;
-		$this->activation->forward();
+		//$this->activation->inputs = $inputs;
+		$this->activation->forward($inputs);
 		$this->output = $this->activation->output;
-		return $this->loss->calculate($this->output,$y_true);
+		$return = $this->loss->calculate($this->output,$y_true);
+		return $return;
 	}
 
 function backward($dvalues, $y_true) {

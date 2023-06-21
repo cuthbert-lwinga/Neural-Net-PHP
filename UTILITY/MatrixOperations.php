@@ -10,10 +10,10 @@ class MathOperations {
   
   // bellow you will find different matrix operations   
   // Function to perform dot product between two matrices
-public static function dot($matrix1, $matrix2) {
-    $result = array();
-    $matrix1_shape = MathOperations::shape($matrix1);
-    $matrix2_shape = MathOperations::shape($matrix2);
+    public static function dot($matrix1, $matrix2) {
+        $result = array();
+        $matrix1_shape = MathOperations::shape($matrix1);
+        $matrix2_shape = MathOperations::shape($matrix2);
     $n1 = count($matrix1);// rows for matrix1
     $m1 = count($matrix1[0]);// cols for matrix1
     $n2 = count($matrix2); // rows for matrix2
@@ -41,21 +41,21 @@ public static function dot($matrix1, $matrix2) {
 
 
 public static function applyThreshold($inputs,$threshold) {
-        $rows = count($inputs);
+    $rows = count($inputs);
 
 $dinputs = []; // Initialize the $dinputs array
 
-    for ($i = 0; $i < $rows; $i++) {
-        $cols = count($inputs[$i]);
-        for ($j = 0; $j < $cols; $j++) {
-            if ($inputs[$i][$j] <= $threshold) {
-                $dinputs[$i][$j] = 0;
-            } else {
-                $dinputs[$i][$j] = $inputs[$i][$j];
-            }
+for ($i = 0; $i < $rows; $i++) {
+    $cols = count($inputs[$i]);
+    for ($j = 0; $j < $cols; $j++) {
+        if ($inputs[$i][$j] <= $threshold) {
+            $dinputs[$i][$j] = 0;
+        } else {
+            $dinputs[$i][$j] = $inputs[$i][$j];
         }
     }
-    return $dinputs;
+}
+return $dinputs;
 }
 
 
@@ -85,11 +85,11 @@ public static function empty_like($array) {
 }
 
 public static function JacobianMatrix($input) {
-        $inputMatrix = MathOperations::reshape($input, [1, count($input)]);
-        $flattened = MathOperations::diagflat($input);
-        $dot = MathOperations::dot($inputMatrix,MathOperations::transform($inputMatrix));
-        $temp = MathOperations::m_operator($flattened, "-", $dot);
-        return $temp;
+    $inputMatrix = MathOperations::reshape($input, [1, count($input)]);
+    $flattened = MathOperations::diagflat($input);
+    $dot = MathOperations::dot($inputMatrix,MathOperations::transform($inputMatrix));
+    $temp = MathOperations::m_operator($flattened, "-", $dot);
+    return $temp;
 
 }
 public static function diagflat($input) {
@@ -120,9 +120,9 @@ public static function flattenArray($input) {
 
   foreach ($input as $item) {
     $result[] = $item[0];
-  }
+}
 
-  return $result;
+return $result;
 }
 
 
@@ -159,9 +159,26 @@ public static function multiply_scalar($array, $number) {
     return $result;
 }
 
+public static function multiplyArrayByScalar($array, $scalar) {
+    return array_map(function($subArray) use ($scalar) {
+        return array_map(function($element) use ($scalar) {
+            return $element * $scalar;
+        }, $subArray);
+    }, $array);
+}
+
+
 
 public static function m_operator($matrix1, $operator, $value) {
     if (is_numeric($value)) {
+
+        if (is_array($matrix1)&&$operator=="x") {
+            
+            if (!is_array($matrix1[0])){
+                return MathOperations::multiplyArrayByScalar($matrix1, $value);
+            }
+        }
+
         foreach ($matrix1 as &$row) {
             foreach ($row as &$element) {
                 if ($operator === '+') {
@@ -178,7 +195,7 @@ public static function m_operator($matrix1, $operator, $value) {
             }
         }
     }elseif (is_array($value) && self::isMatrix($value)) {
-            $matrix2 = $value;
+        $matrix2 = $value;
 
             $n1 = count($matrix1); // number of rows
             $m1 = count($matrix1[0]); // number of cols
@@ -188,9 +205,9 @@ public static function m_operator($matrix1, $operator, $value) {
             if( $m1==$n2 && $m2==1 ){
               // then this is good to process
 
-            for ($i = 0; $i < $n1; $i++) {
-                for ($j = 0; $j < $m1; $j++) {
-                    if ($operator === '+') {
+                for ($i = 0; $i < $n1; $i++) {
+                    for ($j = 0; $j < $m1; $j++) {
+                        if ($operator === '+') {
                         $matrix1[$i][$j] += $matrix2[$j][0]; // Element-wise addition
                     } elseif ($operator === '-') {
                         $matrix1[$i][$j] -= $matrix2[$j][0]; // Element-wise subtraction
@@ -203,22 +220,22 @@ public static function m_operator($matrix1, $operator, $value) {
 
             return $matrix1;
 
-            }
+        }
 
-            if ($n1 !== $n2 || $m1 !== $m2) {
+        if ($n1 !== $n2 || $m1 !== $m2) {
                 // Perfom padding
-       
-                if($n2<$n1){
-                    $matrix2 = MathOperations::padMatrix($matrix1,$n1);
-                    return MathOperations::m_operator($matrix1, $operator,$matrix1);
-                }else{
-                    die("Error: Incompatible matrix sizes for element-wise operation.");
-                }
+         
+            if($n2<$n1){
+                $matrix2 = MathOperations::padMatrix($matrix1,$n1);
+                return MathOperations::m_operator($matrix1, $operator,$matrix1);
+            }else{
+                die("Error: Incompatible matrix sizes for element-wise operation.");
             }
+        }
 
-            for ($i = 0; $i < $n1; $i++) {
-                for ($j = 0; $j < $m1; $j++) {
-                    if ($operator === '+') {
+        for ($i = 0; $i < $n1; $i++) {
+            for ($j = 0; $j < $m1; $j++) {
+                if ($operator === '+') {
                         $matrix1[$i][$j] += $matrix2[$i][$j]; // Element-wise addition
                     } elseif ($operator === '-') {
                         $matrix1[$i][$j] -= $matrix2[$i][$j]; // Element-wise subtraction
@@ -243,41 +260,41 @@ public static function m_operator($matrix1, $operator, $value) {
 
                 if($n2<$n1){
                     $matrix2 = MathOperations::padMatrix($matrix1,$n1);
-               
+                    
                     return MathOperations::m_operator($matrix1, $operator,$matrix1);
                 }else{
                     die("Error: Incompatible matrix sizes for element-wise operation.");
                 }
 
             }else{
-                        echo "Error: Invalid value. Value must be a numeric scalar or a matrix. while performing $operator by $value";
-            
-                        MathOperations::printMatrix($matrix1,5);
-                        die();
-                    }
+                echo "Error: Invalid value. Value must be a numeric scalar or a matrix. while performing $operator by $value";
+                
+                MathOperations::printMatrix($matrix1,5);
+                die();
+            }
         }
-    
-    return $matrix1;
-}
-
-
-private static function padMatrix($array, $numRows) {
-    $result = array();
-    
-    for ($i = 0; $i < $numRows; $i++) {
-        $result[] = $array;
+        
+        return $matrix1;
     }
-    
-    return $result;
-}
 
-      private static function isMatrix($matrix) {
+
+    private static function padMatrix($array, $numRows) {
+        $result = array();
+        
+        for ($i = 0; $i < $numRows; $i++) {
+            $result[] = $array;
+        }
+        
+        return $result;
+    }
+
+    private static function isMatrix($matrix) {
         if(!is_array($matrix)){
             return false;
         }
 
         if(!is_array($matrix[0])){
-                    return false;
+            return false;
         }
         $numRows = count($matrix);
         $numCols = count($matrix[0]);
@@ -290,62 +307,77 @@ private static function padMatrix($array, $numRows) {
 
         return true;
     }
-  
+    
   // Function to create an n * m matrix filled with zeros
-  public static function zeros($n, $m) {
-    $matrix = array();
-    for ($i = 0; $i < $n; $i++) {
-      $row = array();
-      for ($j = 0; $j < $m; $j++) {
-        $row[] = 0;
-      }
-      $matrix[] = $row;
+    public static function zeros($n, $m) {
+        $matrix = array();
+        for ($i = 0; $i < $n; $i++) {
+          $row = array();
+          for ($j = 0; $j < $m; $j++) {
+            $row[] = 0;
+        }
+        $matrix[] = $row;
     }
 
     return $matrix;
 
+}
+
+public static function transform($inputMatrix) {
+  $result = array();
+  
+  $n = count($inputMatrix);
+  $m = count($inputMatrix[0]);
+  
+  for ($j = 0; $j < $m; $j++) {
+    $row = array();
+    for ($i = 0; $i < $n; $i++) {
+      $row[] = $inputMatrix[$i][$j];
   }
+  $result[] = $row;
+}
 
-    public static function transform($inputMatrix) {
-      $result = array();
-      
-      $n = count($inputMatrix);
-      $m = count($inputMatrix[0]);
-      
-      for ($j = 0; $j < $m; $j++) {
+return $result;
+}
+
+public static function rand($n, $m, $min = 0, $max = 1) {
+        // $matrix = array();
+    
+        // for ($i = 0; $i < $n; $i++) {
+        //     $row = array();
+        //     for ($j = 0; $j < $m; $j++) {
+        //         $row[] = $min + mt_rand() / mt_getrandmax() * ($max - $min);
+        //     }
+        //     $matrix[] = $row;
+        // }
+    
+        // return $matrix;
+
+    $matrix = array();
+    
+    for ($i = 0; $i < $n; $i++) {
         $row = array();
-        for ($i = 0; $i < $n; $i++) {
-          $row[] = $inputMatrix[$i][$j];
+        for ($j = 0; $j < $m; $j++) {
+            $u1 = 1 - random_int(0, mt_getrandmax()) / mt_getrandmax();
+            $u2 = 1 - random_int(0, mt_getrandmax()) / mt_getrandmax();
+            $randStdNormal = sqrt(-2 * log($u1)) * cos(2 * pi() * $u2);
+            $row[] = $randStdNormal;
         }
-        $result[] = $row;
-      }
-      
-      return $result;
+        $matrix[] = $row;
     }
-
-    public static function rand($n, $m, $min = 0, $max = 1) {
-        $matrix = array();
-        
-        for ($i = 0; $i < $n; $i++) {
-            $row = array();
-            for ($j = 0; $j < $m; $j++) {
-                $row[] = $min + mt_rand() / mt_getrandmax() * ($max - $min);
-            }
-            $matrix[] = $row;
-        }
-        
-        return $matrix;
-    }
+    
+    return $matrix;
+}
 
 
-    public static function clip($array, $minValue, $maxValue) {
-        foreach ($array as &$subarray) {
-            foreach ($subarray as &$value) {
-                $value = max(min($value, $maxValue), $minValue);
-            }
+public static function clip($array, $minValue, $maxValue) {
+    foreach ($array as &$subarray) {
+        foreach ($subarray as &$value) {
+            $value = max(min($value, $maxValue), $minValue);
         }
-        return $array;
     }
+    return $array;
+}
 
 
 public static function sum($array, $axis = null) {
@@ -362,7 +394,7 @@ public static function sum($array, $axis = null) {
     } elseif ($axis === 1) {
         foreach ($array as $row) {
 
-    
+            
 
             $result[] = array_sum($row);
         }
@@ -414,7 +446,7 @@ public static function printMatrix($matrix, $limit = null)
 
 
 
-    public static function np_eye_index($labels, $y_true)
+public static function np_eye_index($labels, $y_true)
 {
     $eyeMatrix = MathOperations::eye($labels);
     $result = array();
@@ -424,37 +456,35 @@ public static function printMatrix($matrix, $limit = null)
     return $result;
 }
 
-    public static function extract_matrix_one_hot_encoded($matrix,$encode){
-        $return = array();
-        $matrix_count = count($matrix);
-        if ($matrix_count!=count($encode)) {
-            die("one_hot_encoding_linear: length of matrix and hot encoding linear array don't match");
-        }
-
-        for ($i = 0; $i < $matrix_count; $i++) {
-            $max = $matrix[$i];
-            $index = array_search(1,$encode[$i]);
-
-            if (!empty($index)){
-                if ($index>=0&&$index<count($max)) {
-                    $return[] = $matrix[$i][$index]; 
-                }else{
-                die("one_hot_encoding_linear: index out of bound");
-            }
-            }else{
-                die("one_hot_encoding_linear: not hot encoded found AKA: no 1 found @ encode[$i]");
-            }
-        } 
-
-        return $return;   
+public static function extract_matrix_one_hot_encoded($matrix,$encode){
+    $return = array();
+    $matrix_count = count($matrix);
+    if ($matrix_count!=count($encode)) {
+        die("one_hot_encoding_linear: length of matrix and hot encoding linear array don't match");
     }
 
-    public static function subtractFromDInputs($dinputs, $y_true,$value) {
+    for ($i = 0; $i < $matrix_count; $i++) {
+        $max = $matrix[$i];
+        $index = array_search(1,$encode[$i]);
+        if (is_numeric($index)){
+            if ($index>=0&&$index<count($max)) {
+                $return[] = $matrix[$i][$index]; 
+            }else{
+                die("one_hot_encoding_linear: index out of bound");
+            }
+        }else{
+            die("one_hot_encoding_linear: not hot encoded found AKA: no 1 found @ encode[$i]");
+        }
+    } 
+
+    return $return;   
+}
+
+public static function subtractFromDInputs($dinputs, $y_true,$value) {
   for ($i = 0; $i < count($y_true); $i++) {
-    //echo count($dvalues)." = ".count($y_true);
     $dinputs[$i][$y_true[$i]] -= $value;
-  }
-  return $dinputs;
+}
+return $dinputs;
 }
 
 public static function max($inputs, $axis, $keepdims = true)
@@ -483,28 +513,28 @@ public static function max($inputs, $axis, $keepdims = true)
 }
 
 
-    public static function argmax($matrix){
-        $return = array();
-        $matrix_count = count($matrix);
-        for ($i = 0; $i < $matrix_count; $i++) {
-            $row = $matrix[$i];
-            $return[] = array_search(max($row),$row);
-        } 
-        return $return;   
-    }
+public static function argmax($matrix){
+    $return = array();
+    $matrix_count = count($matrix);
+    for ($i = 0; $i < $matrix_count; $i++) {
+        $row = $matrix[$i];
+        $return[] = array_search(max($row),$row);
+    } 
+    return $return;   
+}
 
 
-    public static function accuracy($matrix,$true_values){
-        $correct = 0;
-        $matrix_count = count($matrix);
-        $prediction =MathOperations::argmax($matrix);
-        for ($i = 0; $i < $matrix_count; $i++) {
-            if ($prediction[$i]==$true_values[$i]) {
-                $correct++;
-            }
-        } 
-        return $correct/$matrix_count;   
-    }
+public static function accuracy($matrix,$true_values){
+    $correct = 0;
+    $matrix_count = count($matrix);
+    $prediction =MathOperations::argmax($matrix);
+    for ($i = 0; $i < $matrix_count; $i++) {
+        if ($prediction[$i]==$true_values[$i]) {
+            $correct++;
+        }
+    } 
+    return $correct/$matrix_count;   
+}
 
 
 public static function eye($n) {
@@ -520,28 +550,27 @@ public static function eye($n) {
 }
 
 
-      public static function extract_matrix_by_scalar($matrix,$encode){
-        $return = array();
-        $matrix_count = count($matrix);
-        if ($matrix_count!=count($encode)) {
-            die("extract_matrix_by_scalar: length of matrix and hot encoding linear array don't match");
+public static function extract_matrix_by_scalar($matrix,$encode){
+    $return = array();
+    $matrix_count = count($matrix);
+    if ($matrix_count!=count($encode)) {
+        die("extract_matrix_by_scalar: length of matrix and hot encoding linear array don't match");
+    }
+
+    for ($i = 0; $i < $matrix_count; $i++) {
+        $max = $matrix[$i];
+        if ($encode[$i]>=0&&$encode[$i]<count($max)) {
+            $return[] = $matrix[$i][$encode[$i]]; 
+        }else{
+            die("extract_matrix_by_scalar: index out of bound");
         }
-
-        for ($i = 0; $i < $matrix_count; $i++) {
-            $max = $matrix[$i];
-            if ($encode[$i]>=0&&$encode[$i]<count($max)) {
-                // code...
-                $return[] = $matrix[$i][$encode[$i]]; 
-            }else{
-                die("extract_matrix_by_scalar: index out of bound");
-            }
-        } 
-
-        return $return;   
     } 
 
+    return $return;   
+} 
 
-    public static function luDecomp($matrix) {
+
+public static function luDecomp($matrix) {
     $n = count($matrix);
     
     // Initialize L and U matrices as zero matrices
@@ -628,17 +657,23 @@ public static function shape($array) {
 
 private static function generateStandardNormalRandom() {
         // Use a suitable method to generate random numbers following a standard normal distribution
-        // Example: Box-Muller transform
-        $u1 = 1 - random_int(0, mt_getrandmax()) / mt_getrandmax();
-        $u2 = 1 - random_int(0, mt_getrandmax()) / mt_getrandmax();
-        $z = sqrt(-2 * log($u1)) * cos(2 * pi() * $u2);
+    // $u1 = 1 - random_int(0, mt_getrandmax()) / mt_getrandmax();
+    // $u2 = 1 - random_int(0, mt_getrandmax()) / mt_getrandmax();
+    // $z = sqrt(-2 * log($u1)) * cos(2 * pi() * $u2);
 
-        return $z;
-    }
+    // return $z;
+
+        $u1 = 1 - rand() / (getrandmax() + 1);
+    $u2 = 1 - rand() / (getrandmax() + 1);
+    $z = sqrt(-2 * log($u1)) * cos(2 * pi() * $u2);
+
+    return $z;
+
+}
 
 
 
-    public static function spiral_data($points, $classes) {
+public static function spiral_data($points, $classes) {
     $X = array();
     $y = array();
     

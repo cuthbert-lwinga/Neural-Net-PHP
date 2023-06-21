@@ -13,41 +13,63 @@ class Activation_Softmax {
     	$this->inputs = $inputs;
     }
 
-    public function forward($inputs=null) {
-        if ($inputs!=null) {
-            $this->inputs = $inputs;
-        }
+    // public function forward($inputs=null) {
+    //     if ($inputs!=null) {
+    //         $this->inputs = $inputs;
+    //     }
 
-    	$inputs = $this->inputs;
-        $maxInputs = array_map('max', $inputs);
-        $maxInputs = array_map(function ($value) {
-            return [$value];
-        }, $maxInputs);
+    // 	$inputs = $this->inputs;
+    //     $maxInputs = array_map('max', $inputs);
+
+    //     $maxInputs = array_map(function ($value) {
+    //         return [$value];
+    //     }, $maxInputs);
         
-        $expValues = array_map(function ($input, $maxInput) {
-            $exp = array_map(function ($value) use ($maxInput) {
-                return exp($value - $maxInput[0]);
-            }, $input);
-            return $exp;
-        }, $inputs, $maxInputs);
+    //     $expValues = array_map(function ($input, $maxInput) {
+    //         $exp = array_map(function ($value) use ($maxInput) {
+    //             return exp($value - $maxInput[0]);
+    //         }, $input);
+    //         return $exp;
+    //     }, $inputs, $maxInputs);
         
-        $sumExpValues = array_map(function ($exp) {
-            return array_sum($exp);
-        }, $expValues);
+    //     $sumExpValues = array_map(function ($exp) {
+    //         return array_sum($exp);
+    //     }, $expValues);
         
-        $probabilities = array_map(function ($exp, $sumExp) {
-            return array_map(function ($value) use ($sumExp) {
-                return $value / $sumExp;
-            }, $exp);
-        }, $expValues, $sumExpValues);
+    //     $probabilities = array_map(function ($exp, $sumExp) {
+    //         return array_map(function ($value) use ($sumExp) {
+    //             return $value / $sumExp;
+    //         }, $exp);
+    //     }, $expValues, $sumExpValues);
         
-        $this->output = $probabilities;
+    //     $this->output = $probabilities;
 
-        // new 
+    //     // new 
 
+    // }
+public function forward($inputs = null) {
+    $maxInputs = max($inputs[0]);
 
+    $expValues = array_map(function ($input) use ($maxInputs) {
+        $exp = array_map(function ($value) use ($maxInputs) {
+            return exp($value - $maxInputs);
+        }, $input);
+        return $exp;
+    }, $inputs);
 
-    }
+    $sumExpValues = array_map(function ($exp) {
+        return array_sum($exp);
+    }, $expValues);
+
+    $probabilities = array_map(function ($exp, $sumExp) {
+        $softmax = array_map(function ($value) use ($sumExp) {
+            return $value / $sumExp;
+        }, $exp);
+        return $softmax;
+    }, $expValues, $sumExpValues);
+
+    $this->output = $probabilities;
+}
 
 
     public function backward($dinput){

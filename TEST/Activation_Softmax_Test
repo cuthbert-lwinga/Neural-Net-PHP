@@ -3,30 +3,27 @@ include_once("../CLASSES/headers.php");
 use MathOperations as np; // simulating numpy from python 
 use TestOperations as Test; // For testing 
 
-$inputs = [
-    [4.8, 1.21, 2.385],
-    [8.9, -1.81, 0.2],
-    [1.41, 1.05, 0.026]
+$softmax_outputs = [
+    [0.7, 0.1, 0.2],
+    [0.1, 0.5, 0.4],
+    [0.02, 0.9, 0.08]
 ];
+$class_targets = [0, 1, 1];
 
-$softmax = new Activation_Softmax($inputs);
-$softmax->forward();
-$output = $softmax->output;
+$softmax_loss = new Activation_Softmax_Loss_CategoricalCrossentropy();
+$softmax_loss->backward($softmax_outputs, $class_targets);
+$dvalues1 = $softmax_loss->dinputs;
 
-// array(1) {
-//   [0]=>
-//   array(3) {
-//     [0]=>
-//     float(0.89528266395726185944425878915353678166866302490234375)
-//     [1]=>
-//     float(0.0247083067820993707019994189977296628057956695556640625)
-//     [2]=>
-//     float(0.08000902926063870046480275277644977904856204986572265625)
-//   }
-// }
+$activation = new Activation_Softmax();
+$activation->output = $softmax_outputs;
+$loss = new Loss_CategoricalCrossentropy();
+$loss->backward($softmax_outputs, $class_targets);
+$activation->backward($loss->dinputs);
+$dvalues2 = $activation->dinputs;
 
-var_dump(($output));
-
-
+echo "\n\nGradients: combined loss and activation:\n\n";
+np::printMatrix($dvalues1,3);
+echo "\n\nGradients: separate loss and activation:\n\n";
+np::printMatrix($dvalues2,3);
 
 ?>
