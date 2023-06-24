@@ -30,44 +30,19 @@ class Loss_CategoricalCrossentropy extends Loss {
     // Number of labels in every sample
         $labels = count($dvalues[0]);
 
-        $isFlat  = false;
     // If labels are sparse, turn them into one-hot vector
         if (np::checkArrayShape($y_true)==1) {
-            $isFlat  = true;
         $y_true = np::np_eye_index($labels,$y_true);//;np::eye($labels)[$y_true];
     }
 
     // Calculate gradient
     $temp = np::m_operator($y_true,"x",-1);
     $dinputs = np::m_operator($temp,"/",$dvalues);
-//     np::printMatrix($dinputs);
-// echo "\n\n";
-    // if ($isFlat) {
-    //     $temp = $dvalues;
-
-    //     for ($i=0; $i < count($dinputs); $i++) { 
-    //         $index = array_search(1, $y_true[$i]);
-    //         $temp[$i][$index] = $dinputs[$i][$index];
-    //     }
-    // $dinputs = $temp;
-    // }
-  
-  // np::printMatrix($temp);
-  //           echo "\n";
-  //       die();
-
-
     $this->dinputs = np::m_operator($dinputs,"x",(1 / $samples));
     
 }
 
 
-
-//     public function calculate($output, $y) {
-//     $sample_losses = $this->forward($output, $y);
-//     $data_loss = array_sum($sample_losses) / count($sample_losses);
-//     return $data_loss;
-// }
 }
 
 

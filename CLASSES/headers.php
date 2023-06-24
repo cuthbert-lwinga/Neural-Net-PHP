@@ -10,4 +10,5 @@ include_once("Loss_CategoricalCrossentropy.php");
 include_once("Activation_Softmax_Loss_CategoricalCrossentropy.php");
 include_once("Optimizer_SGD.php");
 include_once("grapher.php");
+include_once("optimizer_Adagrad.php");
 ?>

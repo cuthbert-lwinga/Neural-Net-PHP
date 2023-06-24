@@ -20,10 +20,9 @@ function TEST_MOMENTUM(){
 
     $loss_activation = new Activation_Softmax_Loss_CategoricalCrossentropy();
 
-
-    $learning_rate = 0.85;
-    $decay = 0;//1e-3;
-    $momentum = 0;//0.5;
+    $learning_rate = 1;
+    $decay = 1e-3;
+    $momentum = 0.5;
 
     $optimizer = new Optimizer_SGD($learning_rate,$decay,$momentum);
 

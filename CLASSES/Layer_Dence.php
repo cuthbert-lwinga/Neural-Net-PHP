@@ -13,8 +13,10 @@ class Layer_Dense{
 	public $doutput;
 	public $weight_momentums = NULL;
 	public $bias_momentums = NULL;
+	public $weight_cache = NULL;
+	public $bias_cache = NULL;
 	function __construct($n_inputs,$n_neurons){
-		$this->weights = np::m_operator(np::rand($n_inputs,$n_neurons,-1,1),"x",0.01);
+		$this->weights = np::m_operator(np::rand($n_inputs,$n_neurons),"x",0.01);
 		$zerosMatrix = np::zeros(1,$n_neurons);
 		$this->biases  = $zerosMatrix;
 	}
@@ -27,10 +29,12 @@ class Layer_Dense{
 
 	public function backward($dvalues) {
 	  // Gradients on parameters
+
 		$this->dweights = np::dot(np::transform($this->inputs), $dvalues);
 		$this->dbiases = array(np::sum($dvalues,0));
-		$transformedWeights = np::transform($this->weights);
+		$transformedWeights = np::transform($this->weights); 
 		$this->dinputs = np::dot($dvalues,$transformedWeights);
+		
 	}
 
 }

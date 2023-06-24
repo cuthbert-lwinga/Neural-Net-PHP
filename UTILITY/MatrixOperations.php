@@ -1,13 +1,13 @@
 <?PHP
 
 class MathOperations {
-  
+
   // //  M    M   A   TTTTT  RRRRR   IIIII   X   X
   // //  MM  MM  A A    T    R    R    I      X X 
   // //  M MM M AAAAA   T    RRRRR     I       X  
   // //  M    M A   A   T    RR        I      X X 
   // //  M    M A   A   T    R   R   IIIII   X   X  
-  
+
   // bellow you will find different matrix operations   
   // Function to perform dot product between two matrices
     public static function dot($matrix1, $matrix2) {
@@ -24,12 +24,35 @@ class MathOperations {
         return $result;
     }
     
+    $Matrix_1_has_NAN = MathOperations::findNaN($matrix1);
+    $Matrix_2_has_NAN = MathOperations::findNaN($matrix2);
+
+    if ($Matrix_1_has_NAN !== null) {
+        $rowIndex = $Matrix_1_has_NAN['row'];
+        $colIndex = $Matrix_1_has_NAN['col'];
+        echo "Error: NaN found in Matrix 1 at row $rowIndex, col $colIndex\n";
+    } elseif ($Matrix_2_has_NAN !== null) {
+        $rowIndex = $Matrix_2_has_NAN['row'];
+        $colIndex = $Matrix_2_has_NAN['col'];
+        echo "Error: NaN found in Matrix 2 at row $rowIndex, col $colIndex\n";
+    } else {
+    // Code when no NaN is found in either matrix
+    // ...
+    }
+
     for ($i = 0; $i < $n1; $i++) {
         $row = array();
         for ($j = 0; $j < $m2; $j++) {
             $sum = 0;
             for ($k = 0; $k < $m1; $k++) {
-                $sum += $matrix1[$i][$k] * $matrix2[$k][$j];
+                //$sum += $matrix1[$i][$k] * $matrix2[$k][$j];
+                $product = $matrix1[$i][$k] * $matrix2[$k][$j];
+                if (is_nan($product)) {
+                    echo "Error: NaN encountered at indices ".$matrix1[$i][$k]." and ".$matrix1[$i][$k].".\n";
+                    return $result;
+                }
+                $sum += $product;
+
             }
             $row[] = $sum;
         }
@@ -37,6 +60,21 @@ class MathOperations {
     }
     
     return $result;
+}
+
+public static function findNaN($matrix) {
+    $numRows = count($matrix);
+    $numCols = count($matrix[0]);
+    
+    for ($row = 0; $row < $numRows; $row++) {
+        for ($col = 0; $col < $numCols; $col++) {
+            if (is_nan($matrix[$row][$col])) {
+                return array('row' => $row, 'col' => $col);
+            }
+        }
+    }
+    
+    return null;
 }
 
 
@@ -58,6 +96,37 @@ for ($i = 0; $i < $rows; $i++) {
 return $dinputs;
 }
 
+public static function sqr($matrix) {
+    $rows = count($matrix);
+    $cols = count($matrix[0]);
+
+    // Create a result matrix with the same dimensions
+    $result = array();
+    for ($i = 0; $i < $rows; $i++) {
+        $result[$i] = array();
+        for ($j = 0; $j < $cols; $j++) {
+            $result[$i][$j] = ($matrix[$i][$j] * $matrix[$i][$j]);
+        }
+    }
+
+    return $result;
+}
+
+public static function sqrt($matrix) {
+    $rows = count($matrix);
+    $cols = count($matrix[0]);
+
+    // Create a result matrix with the same dimensions
+    $result = array();
+    for ($i = 0; $i < $rows; $i++) {
+        $result[$i] = array();
+        for ($j = 0; $j < $cols; $j++) {
+            $result[$i][$j] = sqrt($matrix[$i][$j]);
+        }
+    }
+
+    return $result;
+}
 
 
 public static function log($array) {
@@ -173,7 +242,7 @@ public static function m_operator($matrix1, $operator, $value) {
     if (is_numeric($value)) {
 
         if (is_array($matrix1)&&$operator=="x") {
-            
+
             if (!is_array($matrix1[0])){
                 return MathOperations::multiplyArrayByScalar($matrix1, $value);
             }
@@ -224,7 +293,7 @@ public static function m_operator($matrix1, $operator, $value) {
 
         if ($n1 !== $n2 || $m1 !== $m2) {
                 // Perfom padding
-         
+
             if($n2<$n1){
                 $matrix2 = MathOperations::padMatrix($matrix1,$n1);
                 return MathOperations::m_operator($matrix1, $operator,$matrix1);
@@ -323,6 +392,23 @@ public static function m_operator($matrix1, $operator, $value) {
 
 }
 
+public static function zeros_like($matrix) {
+    $result = array();
+    
+    foreach ($matrix as $row) {
+        $resultRow = array();
+        
+        foreach ($row as $value) {
+            $resultRow[] = 0;
+        }
+        
+        $result[] = $resultRow;
+    }
+    
+    return $result;
+}
+
+
 public static function transform($inputMatrix) {
   $result = array();
   
@@ -340,18 +426,7 @@ public static function transform($inputMatrix) {
 return $result;
 }
 
-public static function rand($n, $m, $min = 0, $max = 1) {
-        // $matrix = array();
-    
-        // for ($i = 0; $i < $n; $i++) {
-        //     $row = array();
-        //     for ($j = 0; $j < $m; $j++) {
-        //         $row[] = $min + mt_rand() / mt_getrandmax() * ($max - $min);
-        //     }
-        //     $matrix[] = $row;
-        // }
-    
-        // return $matrix;
+public static function rand($n, $m) {
 
     $matrix = array();
     
@@ -366,7 +441,80 @@ public static function rand($n, $m, $min = 0, $max = 1) {
         $matrix[] = $row;
     }
     
+
+
     return $matrix;
+}
+
+public static function exp($matrix) {
+    $numRows = count($matrix);
+    $numCols = count($matrix[0]);
+    
+    $result = array();
+    
+    for ($row = 0; $row < $numRows; $row++) {
+        $resultRow = array();
+        for ($col = 0; $col < $numCols; $col++) {
+            $resultRow[] = exp($matrix[$row][$col]);
+        }
+        $result[] = $resultRow;
+    }
+    
+    return $result;
+}
+
+public static function deductMaxValueByRow($matrix) {
+    $result = array();
+    
+    foreach ($matrix as $row) {
+        $maxValue = max($row);
+        $resultRow = array();
+        
+        foreach ($row as $value) {
+            $resultRow[] = $value - $maxValue;
+        }
+        
+        $result[] = $resultRow;
+    }
+    
+    return $result;
+}
+
+public static function normalizeRows($matrix) {
+    $result = array();
+    
+    foreach ($matrix as $row) {
+        $rowSum = array_sum($row);
+        
+        if ($rowSum != 0) {
+            $normalizedRow = array_map(function($value) use ($rowSum) {
+                return $value / $rowSum;
+            }, $row);
+            
+            $result[] = $normalizedRow;
+        } else {
+            $result[] = $row; // If the row sum is zero, keep the original row
+        }
+    }
+    
+    return $result;
+}
+
+public static function deductMax($matrix) {
+    $numRows = count($matrix);
+    $numCols = count($matrix[0]);
+    
+    $result = array();
+    
+    for ($row = 0; $row < $numRows; $row++) {
+        $resultRow = array();
+        for ($col = 0; $col < $numCols; $col++) {
+            $resultRow[] = exp($matrix[$row][$col]);
+        }
+        $result[] = $resultRow;
+    }
+    
+    return $result;
 }
 
 
@@ -394,7 +542,7 @@ public static function sum($array, $axis = null) {
     } elseif ($axis === 1) {
         foreach ($array as $row) {
 
-            
+
 
             $result[] = array_sum($row);
         }
@@ -663,7 +811,7 @@ private static function generateStandardNormalRandom() {
 
     // return $z;
 
-        $u1 = 1 - rand() / (getrandmax() + 1);
+    $u1 = 1 - rand() / (getrandmax() + 1);
     $u2 = 1 - rand() / (getrandmax() + 1);
     $z = sqrt(-2 * log($u1)) * cos(2 * pi() * $u2);
 

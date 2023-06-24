@@ -41,36 +41,31 @@ class Optimizer_SGD
 
     public function update_params(&$layer){
 
-        if ($this->momentum!=0){
 
+        if ($this->momentum!=0){
             if (!isset($layer->weight_momentums) && !isset($layer->bias_momentums)) {
-                $layer->weight_momentums = np::zeros(count($layer->weights),count($layer->weights[0]));
-                $layer->bias_momentums = np::zeros(count($layer->biases),count($layer->biases[0]));
+                $layer->weight_momentums = np::zeros_like($layer->weights);
+                $layer->bias_momentums = np::zeros_like($layer->biases);
             }
 
-            $temp_1 = np::m_operator($layer->weight_momentums,"x",$this->momentum);
-            $temp_2 = np::m_operator($layer->dweights,"x",($this->current_learning_rate));
+            $temp_1 = $this->scalarMultiply($layer->weight_momentums,$this->momentum);
+            $temp_2 = $this->scalarMultiply($layer->dweights,($this->current_learning_rate));
             $weight_updates = np::m_operator($temp_1,"-",$temp_2);
-            
             $layer->weight_momentums = $weight_updates;
 
-            $temp_1 = np::m_operator($layer->bias_momentums,"x",$this->momentum);
-            $temp_2 = np::m_operator($layer->dbiases,"x",($this->current_learning_rate));
+            $temp_1 = $this->scalarMultiply($layer->bias_momentums,$this->momentum);
+            $temp_2 = $this->scalarMultiply($layer->dbiases,($this->current_learning_rate));
             $bias_updates = np::m_operator($temp_1,"-",$temp_2);
             $layer->bias_momentums = $bias_updates;
+
+
         }else{
-            $weight_updates = $this->scalarMultiply($layer->dweights,$this->learning_rate);
-            $bias_updates = $this->scalarMultiply($layer->dbiases,$this->learning_rate);
+            $weight_updates = $this->scalarMultiply($layer->dweights,-1*$this->current_learning_rate);
+            $bias_updates = $this->scalarMultiply($layer->dbiases,-1*$this->current_learning_rate);
         }
 
-            // np::printMatrix($layer->dweights,5);
-
-            // echo "\n = \n";
-
-            // np::printMatrix($weight_updates,5);
-            //  echo "\n\n";
-            $layer->weights = np::m_operator($layer->weights,"-",$weight_updates);//$weight_updates;
-            $layer->biases = np::m_operator($layer->biases,"-",$bias_updates);//$bias_updates;
+            $layer->weights = np::m_operator($layer->weights,"+",$weight_updates);//$weight_updates;
+            $layer->biases = np::m_operator($layer->biases,"+",$bias_updates);//$bias_updates;
         }
 
         public function scalarMultiply($matrix, $scalar) {

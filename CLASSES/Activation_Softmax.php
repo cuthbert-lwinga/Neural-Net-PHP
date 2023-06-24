@@ -12,42 +12,8 @@ class Activation_Softmax {
     function __construct($inputs=array()){
     	$this->inputs = $inputs;
     }
-
-    // public function forward($inputs=null) {
-    //     if ($inputs!=null) {
-    //         $this->inputs = $inputs;
-    //     }
-
-    // 	$inputs = $this->inputs;
-    //     $maxInputs = array_map('max', $inputs);
-
-    //     $maxInputs = array_map(function ($value) {
-    //         return [$value];
-    //     }, $maxInputs);
-        
-    //     $expValues = array_map(function ($input, $maxInput) {
-    //         $exp = array_map(function ($value) use ($maxInput) {
-    //             return exp($value - $maxInput[0]);
-    //         }, $input);
-    //         return $exp;
-    //     }, $inputs, $maxInputs);
-        
-    //     $sumExpValues = array_map(function ($exp) {
-    //         return array_sum($exp);
-    //     }, $expValues);
-        
-    //     $probabilities = array_map(function ($exp, $sumExp) {
-    //         return array_map(function ($value) use ($sumExp) {
-    //             return $value / $sumExp;
-    //         }, $exp);
-    //     }, $expValues, $sumExpValues);
-        
-    //     $this->output = $probabilities;
-
-    //     // new 
-
-    // }
-public function forward($inputs = null) {
+    
+public function fwd($inputs = null) {
     $maxInputs = max($inputs[0]);
 
     $expValues = array_map(function ($input) use ($maxInputs) {
@@ -71,6 +37,14 @@ public function forward($inputs = null) {
     $this->output = $probabilities;
 }
 
+public function forward($inputs  = NULL){
+
+    $expValues = np::exp(np::deductMaxValueByRow($inputs));
+
+    $probabilities = np::normalizeRows($expValues);
+
+    $this->output = $probabilities;
+}
 
     public function backward($dinput){
         $this->dinputs = np::empty_like($dinput);

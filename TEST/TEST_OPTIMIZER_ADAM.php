@@ -4,7 +4,7 @@ include_once("../CLASSES/headers.php");
 use MathOperations as np; // simulating numpy from python 
 use TestOperations as Test; // For testing 
 
-function TEST_DECAY(){
+function TEST_ADAM_DECAY(){
     
     list($X, $y) =  np::spiral_data(100, 3);
     $yValues = [];
@@ -15,13 +15,13 @@ function TEST_DECAY(){
     $dense2 = new Layer_Dense(64,3);
     $loss_activation = new Activation_Softmax_Loss_CategoricalCrossentropy();
     $learning_rate = 1;
-    $decay = 0;
+    $decay = 1e-4;
     $momentum = 0;//0.5;
-    $optimizer = new Optimizer_SGD($learning_rate,$decay,$momentum);
+    $optimizer = new optimizer_Adagrad($learning_rate,$decay);
     $accold = -1;
 
     for($i = 0; $i < 10000; $i++){
-
+     
         $dense1->forward($X);
         $activation1->forward($dense1->output);
         $dense2->forward($activation1->output);
@@ -36,14 +36,24 @@ function TEST_DECAY(){
         }
 
         $loss_activation->backward($loss_activation->output,$y);
+
+    $Matrix_has_NAN = MathOperations::findNaN($loss_activation->output);
+
+    if ($Matrix_has_NAN !== null) {
+        $rowIndex = $Matrix_has_NAN['row'];
+        $colIndex = $Matrix_has_NAN['col'];
+        echo "Error: NaN found in loss_activation->output $rowIndex, col $colIndex\n";
+        die();
+    } 
+
         $dense2->backward($loss_activation->dinputs);
         $activation1->backward($dense2->dinputs);
         $dense1->backward($activation1->dinput);
 
-        //$optimizer->pre_update_params();
+        $optimizer->pre_update_params();
         $optimizer->update_params($dense1);
         $optimizer->update_params($dense2);
-        //$optimizer->post_update_params();
+        $optimizer->post_update_params();
 
         // np::printMatrix($activation1->output,5);
 
@@ -109,5 +119,5 @@ $grapher->addColor([255, 215, 0]);  // Gold color
 
 
 //softmax();
-TEST_DECAY();
+TEST_ADAM_DECAY();
 ?>

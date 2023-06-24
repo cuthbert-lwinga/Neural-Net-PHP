@@ -5,7 +5,7 @@ use TestOperations as Test; // For testing
 
 abstract class Loss {
 	public $dinputs;
-    //public abstract function calculate($output, $y);
+    
     protected abstract function forward($y_pred, $y_true);
         public function calculate($output, $y) {
         $sample_losses = $this->forward($output, $y);
