@@ -137,6 +137,19 @@ function test_Activation_Softmax_Loss_CategoricalCrossentropy_backward() {
     echo "\n";
 }
 
+function flatTest(){
+    // Jacobian Test
+    $array = [1, 2, 3, 4, 5, 6];
+    $out = np::npreshape($array, -1, 1);
+    $out2 = np::transform($out);
+    $dot = np::dot($out,$out2);
+
+    $duplicated_col_by_n_rows = np::duplicate($array,count($out));
+    $jacobian_matrix = np::m_operator($duplicated_col_by_n_rows,"-",$dot);
+    echo "\n";
+np::printMatrix($jacobian_matrix);
+}
+flatTest();
 // Run the test suite
 // test_Layer_Dense();
 // test_Activation_ReLU();

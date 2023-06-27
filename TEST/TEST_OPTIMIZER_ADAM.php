@@ -1,6 +1,6 @@
 <?PHP
 include_once("../CLASSES/headers.php");
-
+ini_set('memory_limit', '-1');
 use MathOperations as np; // simulating numpy from python 
 use TestOperations as Test; // For testing 
 
@@ -17,9 +17,9 @@ function TEST_ADAM_DECAY(){
     $learning_rate = 1;
     $decay = 1e-4;
     $momentum = 0;//0.5;
-    $optimizer = new optimizer_Adagrad($learning_rate,$decay);
+    $optimizer = new Optimizer_Adam(0.02,1e-5);//optimizer_RMSprop(0.02,1e-2,1e-7,0.999);//new Optimizer_SGD(0.05,5e-7);
+    //optimizer_RMSprop(0.02,1e-4,1e-7,0.999);
     $accold = -1;
-
     for($i = 0; $i < 10000; $i++){
      
         $dense1->forward($X);
@@ -36,16 +36,6 @@ function TEST_ADAM_DECAY(){
         }
 
         $loss_activation->backward($loss_activation->output,$y);
-
-    $Matrix_has_NAN = MathOperations::findNaN($loss_activation->output);
-
-    if ($Matrix_has_NAN !== null) {
-        $rowIndex = $Matrix_has_NAN['row'];
-        $colIndex = $Matrix_has_NAN['col'];
-        echo "Error: NaN found in loss_activation->output $rowIndex, col $colIndex\n";
-        die();
-    } 
-
         $dense2->backward($loss_activation->dinputs);
         $activation1->backward($dense2->dinputs);
         $dense1->backward($activation1->dinput);
@@ -109,11 +99,9 @@ $grapher->addColor([255, 215, 0]);  // Gold color
     $graph4 = imagecreatefrompng("2.png");
 
     $graphs = [$graph1, $graph2,$graph3,$graph4];
-    $outputPath = "learning_rate = $learning_rate ,decay = $decay,monument = $momentum.png";
+    $outputPath = "TEST_ADAM_DECAY.png";
 
     $grapher->combineGraphs($graphs, $outputPath);
-
-
 
 }
 

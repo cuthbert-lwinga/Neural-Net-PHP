@@ -77,6 +77,23 @@ public static function findNaN($matrix) {
     return null;
 }
 
+public static function findNegativeNumber($matrix) {
+    $numRows = count($matrix);
+    $numCols = count($matrix[0]);
+    
+    for ($row = 0; $row < $numRows; $row++) {
+        for ($col = 0; $col < $numCols; $col++) {
+            // Check if the current element is a negative number
+            if ($matrix[$row][$col] < 0) {
+                return array('row' => $row, 'col' => $col);
+            }
+        }
+    }
+    
+    // If no negative number is found, return null
+    return null;
+}
+
 
 public static function applyThreshold($inputs,$threshold) {
     $rows = count($inputs);
@@ -161,6 +178,49 @@ public static function JacobianMatrix($input) {
     return $temp;
 
 }
+
+public static function duplicate($arr,$rows){
+    $return = [];
+
+    for ($i=0; $i < $rows; $i++) { 
+        $return[] = $arr;
+    }
+    return $return;
+}
+
+public static function npreshape($array, $rows, $columns) {
+    $totalElements = count($array);
+    
+    if ($rows === -1) {
+        if ($totalElements % $columns !== 0) {
+            throw new Exception("Invalid reshape dimensions");
+        }
+        
+        $rows = $totalElements / $columns;
+    }
+    
+    $reshapedArray = [];
+    
+    for ($i = 0; $i < $rows; $i++) {
+        $row = [];
+        
+        for ($j = 0; $j < $columns; $j++) {
+            $elementIndex = $i * $columns + $j;
+            
+            if ($elementIndex < $totalElements) {
+                $row[] = $array[$elementIndex];
+            } else {
+                $row[] = null; // Fill remaining elements with null
+            }
+        }
+        
+        $reshapedArray[] = $row;
+    }
+    
+    return $reshapedArray;
+}
+
+
 public static function diagflat($input) {
     // Get the length of the input array
     $length = count($input);
@@ -836,6 +896,25 @@ public static function spiral_data($points, $classes) {
         }
     }
     
+    return array($X, $y);
+}
+
+
+public static function vertical_data($samples, $classes) {
+    $X = array();
+    $y = array();
+
+    for ($class_number = 0; $class_number < $classes; $class_number++) {
+        $ix = range($samples * $class_number, $samples * ($class_number + 1));
+        $r = MathOperations::linspace(0.0, 1, $samples); // radius
+        $t = MathOperations::linspace($class_number * 4, ($class_number + 1) * 4, $samples);
+        for ($i = 0; $i < $samples; $i++) {
+            $t[$i] += MathOperations::randn() * 0.2;
+            $X[$ix[$i]] = array($r[$i] * sin($t[$i] * 2.5), $r[$i] * cos($t[$i] * 2.5));
+            $y[$ix[$i]] = $class_number;
+        }
+    }
+
     return array($X, $y);
 }
 

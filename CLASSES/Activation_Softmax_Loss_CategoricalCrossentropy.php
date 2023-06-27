@@ -13,7 +13,6 @@ class Activation_Softmax_Loss_CategoricalCrossentropy extends Loss{
 	}
 
 	public function forward($inputs, $y_true) {
-		//$this->activation->inputs = $inputs;
 		$this->activation->forward($inputs);
 		$this->output = $this->activation->output;
 		$return = $this->loss->calculate($this->output,$y_true);
@@ -29,7 +28,7 @@ function backward($dvalues, $y_true) {
     }
 	$dinputs = $dvalues;
     // Calculate gradient
-    $this->dinputs = np::subtractFromDInputs($dinputs, $y_true,1);//self.dinputs[samples, y_true] -= 1, check MatrixOperation for this function equivalent;
+    $this->dinputs = np::subtractFromDInputs($dinputs, $y_true,1);
     $this->dinputs = np::m_operator($this->dinputs,"/",$samples);
 }
 

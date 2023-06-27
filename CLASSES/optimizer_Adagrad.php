@@ -4,7 +4,7 @@ include_once("../CLASSES/headers.php");
 use MathOperations as np; // simulating numpy from python 
 use TestOperations as Test; // For testing 
 
-class optimizer_Adagrad
+class Optimizer_Adagrad
 {
     public $learning_rate;
     public $current_learning_rate;
@@ -35,19 +35,16 @@ class optimizer_Adagrad
     public function update_params(&$layer){
 
         if (!isset($layer->weight_cache) && !isset($layer->bias_cache)) {
-            $layer->weight_cache = np::zeros(count($layer->weights),count($layer->weights[0]));
-            $layer->bias_cache = np::zeros(count($layer->biases),count($layer->biases[0]));
+            $layer->weight_cache = np::zeros_like($layer->weights);
+            $layer->bias_cache = np::zeros_like($layer->biases);
         }
 
-        $layer->weight_cache = np::sqr($layer->dweights);
-        $layer->bias_cache = np::sqr($layer->dbiases);
+        $layer->weight_cache = np::m_operator($layer->weight_cache,"+",np::sqr($layer->dweights));
+        $layer->bias_cache = np::m_operator($layer->bias_cache,"+",np::sqr($layer->dbiases));
         
-        $temp_w = np::m_operator($layer->dweights,"/",np::m_operator(np::sqrt($layer->weight_cache),"+",$this->epsilon));
-        $temp_w = $this->scalarMultiply($temp_w,$this->current_learning_rate);
-        
-        $temp_b = np::m_operator($layer->dbiases,"/",np::m_operator(np::sqrt($layer->bias_cache),"+",$this->epsilon));;
-        $temp_b = $this->scalarMultiply($temp_b,$this->current_learning_rate);
-
+        $temp_w = np::m_operator($this->scalarMultiply($layer->dweights,-1*$this->current_learning_rate),"/",np::m_operator(np::sqrt($layer->weight_cache),"+",$this->epsilon));
+    
+        $temp_b = np::m_operator($this->scalarMultiply($layer->dbiases,-1*$this->current_learning_rate),"/",np::m_operator(np::sqrt($layer->bias_cache),"+",$this->epsilon));
 
         $layer->weights = np::m_operator($layer->weights,"+",$temp_w);//$weight_updates;
         $layer->biases = np::m_operator($layer->biases,"+",$temp_b);//$bias_updates;

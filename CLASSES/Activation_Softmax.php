@@ -13,30 +13,6 @@ class Activation_Softmax {
     	$this->inputs = $inputs;
     }
     
-public function fwd($inputs = null) {
-    $maxInputs = max($inputs[0]);
-
-    $expValues = array_map(function ($input) use ($maxInputs) {
-        $exp = array_map(function ($value) use ($maxInputs) {
-            return exp($value - $maxInputs);
-        }, $input);
-        return $exp;
-    }, $inputs);
-
-    $sumExpValues = array_map(function ($exp) {
-        return array_sum($exp);
-    }, $expValues);
-
-    $probabilities = array_map(function ($exp, $sumExp) {
-        $softmax = array_map(function ($value) use ($sumExp) {
-            return $value / $sumExp;
-        }, $exp);
-        return $softmax;
-    }, $expValues, $sumExpValues);
-
-    $this->output = $probabilities;
-}
-
 public function forward($inputs  = NULL){
 
     $expValues = np::exp(np::deductMaxValueByRow($inputs));
@@ -46,7 +22,17 @@ public function forward($inputs  = NULL){
     $this->output = $probabilities;
 }
 
+    // public function backward($dinput){
+    //     $this->dinputss = np::empty_like($dinput);
+    //     for ($i=0; $i < count($this->output); $i++) { 
+    //         $jb = (np::JacobianMatrix($this->output[$i])); 
+    //         $temp = np::flattenArray(np::dot($jb,np::reshape($dinput[$i],[1, count($dinput[$i])])));
+    //         $this->dinputs[$i] = $temp;
+    //     }
+    // }
     public function backward($dinput){
+        np::printMatrix($dinput,5);
+        die();
         $this->dinputs = np::empty_like($dinput);
         for ($i=0; $i < count($this->output); $i++) { 
             $jb = (np::JacobianMatrix($this->output[$i])); 
@@ -54,7 +40,6 @@ public function forward($inputs  = NULL){
             $this->dinputs[$i] = $temp;
         }
     }
-
 
 }
 
