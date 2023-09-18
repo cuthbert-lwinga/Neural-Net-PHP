@@ -1,5 +1,5 @@
 {
-  "name": "cuthbert-lwinga/Neural-Net-PHP",
+  "name": "cuthbert-lwinga/neural-net-php",
   "description": "A lightweight PHP library for building and training simple neural networks. Includes utilities for matrix operations and random number generation.",
   "license": "MIT",
   "autoload": {
