@@ -1,0 +1,10 @@
+<?PHP
+include_once("NumpyLight.php");
+include_once("RandomGenerator.php");
+include_once("Activation_Relu.php");
+include_once("Activation_Softmax.php");
+include_once("Layer_Dense.php");
+include_once("Optimizer_Adam.php");
+include_once("Loss_CategoricalCrossentropy.php");
+include_once("Activation_Softmax_Loss_CategoricalCrossentropy.php");
+?>

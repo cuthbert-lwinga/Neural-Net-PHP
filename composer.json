@@ -1,0 +1,14 @@
+{
+        "autoload": {
+        "psr-4": {
+            "NameSpaceRandomGenerator\\": "CLASSES/",
+            "NameSpaceNumpyLight\\": "CLASSES/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9"
+    },
+        "require": {
+                "smalot/pdfparser": "^2.7"
+        }
+}
