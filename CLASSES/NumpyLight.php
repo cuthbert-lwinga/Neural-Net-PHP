@@ -690,8 +690,15 @@ public static function ReLU($array)
         throw new Exception("Input should be an array.");
     }
 
-    return array_map(function($x) { return max(0, $x); }, $array);
+    return array_map(function($x) {
+        // If the current item is an array, apply ReLU recursively
+        if (is_array($x)) {
+            return self::ReLU($x);
+        }
+        return max(0, $x);
+    }, $array);
 }
+
 
 public static function exp($input_array) {
     $result = array();
@@ -1108,6 +1115,30 @@ public static function sqrt($array) {
     }, $array);
 }
 
+
+public static function hasINF($matrix) {
+    foreach ($matrix as $row) {
+        foreach ($row as $element) {
+            if (is_infinite($element)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+
+public static function hasNAN($matrix) {
+    foreach ($matrix as $row) {
+        foreach ($row as $element) {
+            if (is_nan($element)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 public static function spiral_data($samples, $classes) {
     $X = [];
     $y = [];
@@ -1132,6 +1163,26 @@ public static function spiral_data($samples, $classes) {
     return [$X, $y];
 }
 
+public static function vertical_data($samples, $classes) {
+    $X = [];
+    $y = [];
+
+    for ($class_number = 0; $class_number < $classes; $class_number++) {
+        $ix = range($samples * $class_number, $samples * ($class_number + 1) - 1);
+
+        foreach ($ix as $i) {
+            $X[$i] = [
+                (mt_rand() / mt_getrandmax() - 0.5) * 0.2 + $class_number / 3, // random number centered around class_number / 3
+                (mt_rand() / mt_getrandmax() - 0.5) * 0.2 + 0.5             // random number centered around 0.5
+            ];
+            $y[$i] = $class_number;
+        }
+    }
+
+    return [$X, $y];
+}
+
+
 // Linear interpolation function
 public static function lerp($start, $end, $t) {
     return (1 - $t) * $start + $t * $end;
@@ -1153,6 +1204,16 @@ public static function displayMatrix($matrix, $maxRows = 5) {
 
 public static function sliceMatrix($matrix, $maxRows = 5) {
     return array_slice($matrix, 0, $maxRows);
+}
+
+
+public static function apply_relu_backwards($inputs, $dinputs) {
+    foreach ($inputs as $key => $value) {
+        if ($value <= 0) {
+            $dinputs[$key] = 0;
+        }
+    }
+    return $dinputs;
 }
 
 

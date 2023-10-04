@@ -12,11 +12,13 @@ class Loss {
 }
 
 class Loss_CategoricalCrossentropy extends Loss {
+    public $dinputs; // i added this because of deprecation, could be an issue
     public function forward($y_pred, $y_true) {
         $samples = count($y_pred);
+
         $y_pred_clipped = np::clip($y_pred, 1e-7, 1 - 1e-7);
         
-        if (count(np::shape($y_true)) === 1) {
+        if (count(np::shape($y_true)) == 1) {
             $correct_confidences = np::get_values_from_indexes($y_pred_clipped, $y_true);
         } elseif (count(np::shape($y_true))==2) {
             $correct_confidences = np::sum(np::multiply($y_pred_clipped, $y_true), 1);
@@ -30,7 +32,7 @@ class Loss_CategoricalCrossentropy extends Loss {
         $samples = count($dvalues);
         $labels = count($dvalues[0]);
 
-        if (count(np::shape($y_true)) === 1) {
+        if (count(np::shape($y_true)) == 1) {
             $y_true = np::select_rows_by_indices(np::eye($labels),$y_true ); //np.eye(label)[y_true]
         }
 

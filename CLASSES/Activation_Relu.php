@@ -10,7 +10,7 @@ use NameSpaceRandomGenerator\RandomGenerator;
 class Activation_Relu{
 	public $inputs;
 	public $output;
-    public $dinput;
+    public $dinputs;
 	function __construct($input=array()){
 		$this->inputs = $input;
 	}
@@ -22,7 +22,8 @@ class Activation_Relu{
 
     public function backward($dvalues) {
         $this->dinputs = $dvalues;
-        $this->dinputs = np::ReLU($this->inputs);
+        //$this->dinputs = np::ReLU($this->inputs);
+        $this->dinputs = np::apply_relu_backwards($this->inputs, $this->dinputs);
     }
 
 

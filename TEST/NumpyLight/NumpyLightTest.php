@@ -67,6 +67,11 @@ public function testPow()
     // Test 2D array
     $result = NumpyLight::pow([[1, 2], [3, 4]], 2);
     $this->assertEquals([[1, 4], [9, 16]], $result);
+
+     // Test with negative numbers
+    $result = NumpyLight::pow([-1, -2, 3], 2);
+    $this->assertEquals([1, 4, 9], $result);
+
 }
 
 
@@ -119,6 +124,20 @@ public function testPow()
 
         $this->assertEquals($expected2, $result2);
     }
+
+    public function testDotZeroMatrix()
+{
+
+    echo "\n TESTING....[testDotZeroMatrix]\n";
+    $a = [[0, 0], [0, 0]];
+    $b = [[4, 3], [2, 1]];
+
+    $result = NumPyLight::dot($a, $b);
+    $expected = [[0, 0], [0, 0]];
+
+    $this->assertEquals($expected, $result);
+}
+
 
     public function testSumNoAxisNoKeepdims()
     {

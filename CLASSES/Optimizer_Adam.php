@@ -29,6 +29,57 @@ class Optimizer_Adam {
         }
     }
 
+// public function update_params(&$layer) {
+//     if (!$layer->weight_cache) {
+//         $layer->initialize_caches();
+//     }
+
+//     // Update weight momentums
+//     $layer->weight_momentums = NumpyLight::update_weight_momentums($layer, $this->beta_1);
+//     if (NumpyLight::hasNAN($layer->weight_momentums)) {
+//         echo "\nNaN found in weight momentums\n";
+//         die();
+//     }
+
+//     // Update bias momentums
+//     $layer->bias_momentums = NumpyLight::update_bias_momentums($layer, $this->beta_1);
+//     if (NumpyLight::hasNAN($layer->bias_momentums)) {
+//         echo "\nNaN found in bias momentums\n";
+//         die();
+//     }
+
+//     // Calculate corrected momentums
+//     $weight_momentums_corrected = NumpyLight::correct_momentums($layer->weight_momentums, $this->beta_1, $this->iterations);
+//     $bias_momentums_corrected = NumpyLight::correct_momentums($layer->bias_momentums, $this->beta_1, $this->iterations);
+//     if (NumpyLight::hasNAN($weight_momentums_corrected) || NumpyLight::hasNAN($bias_momentums_corrected)) {
+//         echo "\nNaN found in corrected momentums\n";
+//         die();
+//     }
+
+//     // Update weight and bias caches
+//     $layer->update_caches($this->beta_2);
+//     if (NumpyLight::hasNAN($layer->weight_cache) || NumpyLight::hasNAN($layer->bias_cache)) {
+//         echo "\nNaN found in weight/bias caches\n";
+//         die();
+//     }
+
+//     // Calculate corrected caches
+//     $weight_cache_corrected = NumpyLight::correct_caches($layer->weight_cache, $this->beta_2, $this->iterations);
+//     $bias_cache_corrected = NumpyLight::correct_caches($layer->bias_cache, $this->beta_2, $this->iterations);
+//     if (NumpyLight::hasNAN($weight_cache_corrected) || NumpyLight::hasNAN($bias_cache_corrected)) {
+//         echo "\nNaN found in corrected caches\n";
+//         die();
+//     }
+
+//     // Update weights and biases
+//     $layer->update_weights_and_biases($weight_momentums_corrected, $weight_cache_corrected, $bias_momentums_corrected, $bias_cache_corrected, $this->current_learning_rate, $this->epsilon);
+//     if (NumpyLight::hasNAN($layer->weights) || NumpyLight::hasNAN($layer->biases)) {
+//         echo "\nNaN found in updated weights/biases\n";
+//         die();
+//     }
+// }
+
+
 public function update_params(&$layer) {
     // print_r("Entering update_params\n");
     if (!$layer->weight_cache) {
@@ -44,33 +95,14 @@ public function update_params(&$layer) {
         NumpyLight::multiply($layer->weight_momentums, $this->beta_1),
         NumpyLight::multiply($layer->dweights, 1 - $this->beta_1)
     );
-//     print_r($layer->weight_momentums);
-    
-//     print_r("Calculating bias momentums\n");
 
-//     print_r("showing layer->dbiases");
-//     print_r($layer->dbiases);
-
-// print_r("showing layer->bias_momentums before NumpyLight::add");
-//     print_r($layer->bias_momentums);
-
-
-//     print_r("showing NumpyLight::multiply(layer->bias_momentums, this->beta_1)");
-//     print_r(NumpyLight::multiply($layer->bias_momentums, $this->beta_1));
-
-//         print_r("showing layer->dbiases, 1 - this->beta_1");
-//     print_r( NumpyLight::multiply($layer->dbiases, 1 - $this->beta_1));
 
     $layer->bias_momentums = NumpyLight::add(
         NumpyLight::multiply($layer->bias_momentums, $this->beta_1),
         NumpyLight::multiply($layer->dbiases, 1 - $this->beta_1)
     );
 
-    // print_r("showing layer->bias_momentums after NumpyLight::add");
-
-    // print_r($layer->bias_momentums);
-    
-    // print_r("Calculating corrected weight momentums\n");
+   
     $weight_momentums_corrected = NumpyLight::divide(
         $layer->weight_momentums,
         (1 - pow($this->beta_1, $this->iterations + 1))

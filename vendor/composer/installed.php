@@ -1,19 +1,19 @@
 <?php return array(
     'root' => array(
-        'name' => '__root__',
+        'name' => 'cuthbert-lwinga/neural-net-php',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'b5dac048141f10b2474df4006592386c50d4b34d',
+        'reference' => '507366340ea00a780b6998f57c9a89d8506d17c4',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
         'dev' => true,
     ),
     'versions' => array(
-        '__root__' => array(
+        'cuthbert-lwinga/neural-net-php' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'b5dac048141f10b2474df4006592386c50d4b34d',
+            'reference' => '507366340ea00a780b6998f57c9a89d8506d17c4',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -65,9 +65,9 @@
             'dev_requirement' => true,
         ),
         'phpunit/php-code-coverage' => array(
-            'pretty_version' => '9.2.27',
-            'version' => '9.2.27.0',
-            'reference' => 'b0a88255cb70d52653d80c890bd7f38740ea50d1',
+            'pretty_version' => '9.2.28',
+            'version' => '9.2.28.0',
+            'reference' => '7134a5ccaaf0f1c92a4f5501a6c9f98ac4dcc0ef',
             'type' => 'library',
             'install_path' => __DIR__ . '/../phpunit/php-code-coverage',
             'aliases' => array(),
@@ -110,9 +110,9 @@
             'dev_requirement' => true,
         ),
         'phpunit/phpunit' => array(
-            'pretty_version' => '9.6.11',
-            'version' => '9.6.11.0',
-            'reference' => '810500e92855eba8a7a5319ae913be2da6f957b0',
+            'pretty_version' => '9.6.12',
+            'version' => '9.6.12.0',
+            'reference' => 'a122c2ebd469b751d774aa0f613dc0d67697653f',
             'type' => 'library',
             'install_path' => __DIR__ . '/../phpunit/phpunit',
             'aliases' => array(),
