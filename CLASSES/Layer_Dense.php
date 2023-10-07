@@ -18,7 +18,7 @@ class Layer_Dense{
     public $weight_cache = NULL;
     public $bias_cache = NULL;
     function __construct($n_inputs,$n_neurons){
-        $this->weights = np::multiply(np::random()->rand($n_inputs,$n_neurons), 1e-3); // book is 0.01, but this performs way better. I suspsect it's somthing to do with my random 
+        $this->weights = np::multiply(np::random()->rand($n_inputs,$n_neurons), 1e-4); // book is 0.01, but this performs way better. I suspsect it's somthing to do with my random 
         $zerosMatrix = np::zeros(1,$n_neurons);
         $this->biases  = $zerosMatrix;
     }

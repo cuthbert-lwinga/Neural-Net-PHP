@@ -1183,6 +1183,30 @@ public static function vertical_data($samples, $classes) {
 }
 
 
+public static function circular_data($samples, $classes) {
+    $X = [];
+    $y = [];
+
+    for ($class_number = 0; $class_number < $classes; $class_number++) {
+        $ix = range($samples * $class_number, $samples * ($class_number + 1) - 1);
+        $r = $class_number * 0.5 + 0.3;  // Set radius for each class. This will ensure that the classes are distinguishable.
+
+        foreach ($ix as $i) {
+            $angle = 2 * M_PI * (mt_rand() / mt_getrandmax());  // Random angle between 0 and 2π
+            $radius_noise = (mt_rand() / mt_getrandmax() - 0.5) * 0.1;  // Add some noise to the radius to make it more challenging
+            $X[$i] = [
+                ($r + $radius_noise) * cos($angle),
+                ($r + $radius_noise) * sin($angle)
+            ];
+            $y[$i] = $class_number;
+        }
+    }
+
+    return [$X, $y];
+}
+
+
+
 // Linear interpolation function
 public static function lerp($start, $end, $t) {
     return (1 - $t) * $start + $t * $end;

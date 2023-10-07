@@ -13,6 +13,14 @@ $dense2 = new Layer_Dense(64, 3);
 $loss_activation = new Activation_Softmax_Loss_CategoricalCrossentropy();
 $optimizer = new Optimizer_SGD($learning_rate=1,$decay = 1e-2);
 
+$lossTrend = [];
+$accTrend = [];
+$lrTrend = [];
+
+$plotterTemp = new LinePlotter(500, 500);
+$plotterTemp->plotPoints($X, $y);
+$plotterTemp->save('spiral_data.png');
+
 // // Train the network
 for ($epoch = 0; $epoch <= 10000; $epoch++) {
 	// echo "$epoch \n";
@@ -24,6 +32,9 @@ for ($epoch = 0; $epoch <= 10000; $epoch++) {
 	$predictions = NumpyLight::accuracy($loss_activation->output, $y);
 	
 	if (($epoch%100==0)) {
+		$lossTrend[] = $loss;
+		$accTrend[] = $predictions;
+		$lrTrend[] = $optimizer->current_learning_rate;
 		echo "epoc: $epoch ,\tacc: $predictions\t,loss: $loss,\t lr: $optimizer->current_learning_rate \n";
 	}
 
@@ -45,6 +56,21 @@ for ($epoch = 0; $epoch <= 10000; $epoch++) {
 
 }
 
+
+$plotter = new LinePlotter(500, 500);
+$plotter->setColor('red', 255, 0, 0);
+$plotter->plotLine($lossTrend, 'red');
+$plotter->save('p276_Loss_stat.png');
+
+$plotter = new LinePlotter(500, 500);
+$plotter->setColor('green', 0, 255, 0);
+$plotter->plotLine($accTrend, 'green');
+$plotter->save('p276_Acc_stat.png');
+
+$plotter = new LinePlotter(500, 500);
+$plotter->setColor('blue', 0, 0, 255);
+$plotter->plotLine($lrTrend, 'blue');
+$plotter->save('p276_lr_stat.png');
 
 
 ?>

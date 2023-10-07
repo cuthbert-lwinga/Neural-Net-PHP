@@ -8,4 +8,7 @@ include_once("Optimizer_Adam.php");
 include_once("Loss_CategoricalCrossentropy.php");
 include_once("Activation_Softmax_Loss_CategoricalCrossentropy.php");
 include_once("Optimizer_SGD.php");
+include_once("Optimizer_Adagrad.php");
+include_once("Optimizer_RMSprop.php");
+include_once("LinePlotter.php");
 ?>
