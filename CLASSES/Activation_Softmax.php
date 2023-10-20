@@ -14,7 +14,7 @@ class Activation_Softmax {
     
 public function forward($inputs  = NULL){
 
-    $this->inputs = $inputs;
+    // $this->inputs = $inputs; removed this because wasnt in python code
     $temp =   np::subtract($inputs,np::max($inputs,1,True)); // deduct by row, effectivley reduing the number
     $exp_values = np::exp($temp);
     $probabilities = np::divide($exp_values,np::sum($exp_values,1,True));

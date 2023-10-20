@@ -5,8 +5,8 @@ use NameSpaceNumpyLight\NumpyLight; // simulating numpy from python
 use NameSpaceRandomGenerator\RandomGenerator;
 
 class Activation_Softmax_Loss_CategoricalCrossentropy {
-    private $activation;
-    private $loss;
+    public $activation;
+    public $loss;
     public $output;
     public $dinputs;
 

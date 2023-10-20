@@ -17,8 +17,8 @@ class NumpyLight{
 
   //echo PHP_FLOAT_MAX;
 
-  public static function random(){
-    return new RandomGenerator();
+  public static function random($seed = null){
+    return new RandomGenerator($seed);
 }
 
 
@@ -54,6 +54,18 @@ public static function zeros_like($matrix) {
     }
 }
 
+
+public static function ones_like($matrix,$n=1) {
+    if (is_array($matrix)) {
+        $result = [];
+        foreach ($matrix as $row) {
+            $result[] = self::ones_like($row);
+        }
+        return $result;
+    } else {
+        return $n;
+    }
+}
 
 public static function shape($array) {
     $shape = [];
@@ -916,6 +928,27 @@ public static function transpose($array) {
     return $transposed;
 }
 
+
+public static function addKeyValueToJson($filePath, $key, $value) {
+    // Check if file exists
+    if (file_exists($filePath)) {
+        // Read the existing content
+        $jsonData = json_decode(file_get_contents($filePath), true);
+        if (!$jsonData) {
+            $jsonData = [];
+        }
+    } else {
+        // If not, initialize an empty array
+        $jsonData = [];
+    }
+
+    // Add the key-value pair
+    $jsonData[$key] = $value;
+
+    // Write back to the file
+    file_put_contents($filePath, json_encode($jsonData, JSON_PRETTY_PRINT));
+}
+
 public static function multiply($array1, $array2) {
     // If array2 is a number, perform scalar multiplication
     if (is_numeric($array2)) {
@@ -1163,6 +1196,52 @@ public static function spiral_data($samples, $classes) {
     return [$X, $y];
 }
 
+public static function mandelbrot_spiral_data($samples, $classes) {
+    $X = [];
+    $y = [];
+
+    for ($class_number = 0; $class_number < $classes; $class_number++) {
+        $ix = range($samples * $class_number, $samples * ($class_number + 1) - 1);
+        
+        $r = array_map(function($value) use ($samples) {
+            return $value / ($samples - 1);
+        }, range(0, $samples - 1));
+        
+        $t = [];
+        for ($i = 0; $i < $samples; $i++) {
+            $t[] = self::lerp($class_number * 4, ($class_number + 1) * 4, $i / ($samples - 1)) + (mt_rand() / mt_getrandmax() - 0.5) * 0.2;
+        }
+
+        foreach ($ix as $i) {
+            // Mandelbrot adjustment
+            $c_real = $r[$i % $samples] * sin($t[$i % $samples] * 2.5);
+            $c_imag = $r[$i % $samples] * cos($t[$i % $samples] * 2.5);
+            $mandel_value = self::mandelbrot($c_real, $c_imag);
+            
+            $X[$i] = [$c_real * $mandel_value, $c_imag * $mandel_value];
+            $y[$i] = $class_number;
+        }
+    }
+
+    return [$X, $y];
+}
+
+public static function mandelbrot($real, $imag, $max_iterations = 100) {
+    $z_real = 0;
+    $z_imag = 0;
+    for ($iteration = 0; $iteration < $max_iterations; $iteration++) {
+        $temp = $z_real * $z_real - $z_imag * $z_imag + $real;
+        $z_imag = 2 * $z_real * $z_imag + $imag;
+        $z_real = $temp;
+
+        if ($z_real * $z_real + $z_imag * $z_imag > 4) {
+            return ($iteration + 1) / $max_iterations;  // Normalize to [0, 1]
+        }
+    }
+    return 0;
+}
+
+
 public static function vertical_data($samples, $classes) {
     $X = [];
     $y = [];
@@ -1206,6 +1285,93 @@ public static function circular_data($samples, $classes) {
 }
 
 
+public static function sinusoidal_data($samples, $classes) {
+    $X = [];
+    $y = [];
+
+    for ($class_number = 0; $class_number < $classes; $class_number++) {
+        $ix = range($samples * $class_number, $samples * ($class_number + 1) - 1);
+
+        foreach ($ix as $i) {
+            $angle = 2 * M_PI * (mt_rand() / mt_getrandmax());
+            $X[$i] = [
+                $angle,
+                sin($angle) + $class_number * 0.5 + (mt_rand() / mt_getrandmax() - 0.5) * 0.1
+            ];
+            $y[$i] = $class_number;
+        }
+    }
+
+    return [$X, $y];
+}
+
+
+public static function square_perimeter_data($samples, $classes) {
+    $X = [];
+    $y = [];
+
+    for ($class_number = 0; $class_number < $classes; $class_number++) {
+        $ix = range($samples * $class_number, $samples * ($class_number + 1) - 1);
+        $side = $class_number * 0.5 + 0.5;
+
+        foreach ($ix as $i) {
+            $randChoice = mt_rand(1, 4);
+            $offset = (mt_rand() / mt_getrandmax() - 0.5) * 0.1;
+
+            switch ($randChoice) {
+                case 1:  // top side
+                    $X[$i] = [$offset + $side * (mt_rand() / mt_getrandmax()), $side];
+                    break;
+                case 2:  // bottom side
+                    $X[$i] = [$offset + $side * (mt_rand() / mt_getrandmax()), 0];
+                    break;
+                case 3:  // left side
+                    $X[$i] = [0, $offset + $side * (mt_rand() / mt_getrandmax())];
+                    break;
+                case 4:  // right side
+                    $X[$i] = [$side, $offset + $side * (mt_rand() / mt_getrandmax())];
+                    break;
+            }
+            
+            $y[$i] = $class_number;
+        }
+    }
+
+    return [$X, $y];
+}
+
+public static function moons_data($samples, $classes) {
+        $X = [];
+        $y = [];
+        
+        $samples_per_class = intdiv($samples, $classes);
+
+        for ($class_number = 0; $class_number < $classes; $class_number++) {
+            $ix = range($samples_per_class * $class_number, $samples_per_class * ($class_number + 1) - 1);
+
+            // Compute the angle for each sample in this class
+            $angle = array_map(function($value) use ($samples_per_class, $class_number, $classes) {
+                return 2 * M_PI * $value / ($samples_per_class - 1) + $class_number * 2 * M_PI / $classes;
+            }, range(0, $samples_per_class - 1));
+
+            // Set radius for the moons. This will ensure that the moons are distinguishable.
+            $radius = 0.5;
+
+            foreach ($ix as $i) {
+                $distance_noise = (mt_rand() / mt_getrandmax() - 0.5) * 0.2;  // Add some noise to the distance to make it more challenging
+                $X[$i] = [
+                    ($radius + $distance_noise) * cos($angle[$i % $samples_per_class]) + $class_number * $radius * 1.2,
+                    ($radius + $distance_noise) * sin($angle[$i % $samples_per_class])
+                ];
+                $y[$i] = $class_number;
+            }
+        }
+
+        return [$X, $y];
+    }
+
+
+
 
 // Linear interpolation function
 public static function lerp($start, $end, $t) {
@@ -1231,15 +1397,124 @@ public static function sliceMatrix($matrix, $maxRows = 5) {
 }
 
 
-public static function apply_relu_backwards($inputs, $dinputs) {
-    foreach ($inputs as $key => $value) {
-        if ($value <= 0) {
-            $dinputs[$key] = 0;
+// public static function apply_relu_backwards($inputs, $dinputs,$limit = 0,$newvalue = 0,$strict = true) {
+//     foreach ($inputs as $key => $value) {
+//         if ($strict){
+//                 if ($value <= $limit) {
+//                     $dinputs[$key] = $newvalue;
+//                 }
+//             }else{
+//                 if ($value < $limit) {
+//                     $dinputs[$key] = $newvalue;
+//                 }
+//             }
+//     }
+//     return $dinputs;
+// }
+
+
+public static function apply_relu_backwards($inputs, $dinputs, $limit = 0, $newvalue = 0, $strict = true) {
+    // Check if the shapes of $inputs and $dinputs are the same
+    if (self::shape($inputs) != self::shape($dinputs)) {
+        throw new Exception("The shapes of inputs are not the same.");
+    }
+
+// Check the shape dimensions
+$shape = self::shape($inputs);
+
+// Handle 1D arrays (vectors)
+if (count($shape) == 1) {
+    for ($i = 0; $i < $shape[0]; $i++) {
+        if ($strict) {
+            if ($inputs[$i] <= $limit) {
+                $dinputs[$i] = $newvalue;
+            }
+        } else {
+            if ($inputs[$i] < $limit) {
+                $dinputs[$i] = $newvalue;
+            }
         }
     }
-    return $dinputs;
+}
+// Handle 2D arrays (matrices)
+elseif (count($shape) == 2) {
+    for ($i = 0; $i < $shape[0]; $i++) {
+        for ($j = 0; $j < $shape[1]; $j++) {
+            if ($strict) {
+                if ($inputs[$i][$j] <= $limit) {
+                    $dinputs[$i][$j] = $newvalue;
+                }
+            } else {
+                if ($inputs[$i][$j] < $limit) {
+                    $dinputs[$i][$j] = $newvalue;
+                }
+            }
+        }
+    }
+}
+// Add more nested loops for higher-dimensional arrays if needed
+
+return $dinputs;
+
 }
 
+
+public static function mandelbrotData($width, $height, $max_iterations = 1000) {
+        $X = [];
+        $y = [];
+        $scale = 2; // Adjust for zoom
+
+        for ($x = 0; $x < $width; $x++) {
+            for ($y_coord = 0; $y_coord < $height; $y_coord++) {
+                // Convert pixel coordinate to complex number
+                $c_real = ($x - $width / 2) / ($width / $scale);
+                $c_imag = ($y_coord - $height / 2) / ($height / $scale);
+
+                // Compute the number of iterations for this point
+                $iterations = self::mandelbrotIterations($c_real, $c_imag, $max_iterations);
+
+                // Convert the iteration number into a binary label: 1 for inside Mandelbrot set, 0 for outside
+                $label = ($iterations === $max_iterations) ? 1 : 0;
+
+                $X[] = [$c_real, $c_imag];
+                $y[] = $label;
+            }
+        }
+
+        return [$X, $y];
+    }
+
+    private static function mandelbrotIterations($real, $imag, $max_iterations) {
+        $z_real = 0;
+        $z_imag = 0;
+        for ($iteration = 0; $iteration < $max_iterations; $iteration++) {
+            $temp = $z_real * $z_real - $z_imag * $z_imag + $real;
+            $z_imag = 2 * $z_real * $z_imag + $imag;
+            $z_real = $temp;
+
+            if ($z_real * $z_real + $z_imag * $z_imag > 4) {
+                return $iteration;
+            }
+        }
+        return $max_iterations; // Point is in the Mandelbrot set
+    }
+
+
+    public static function abs($arr) {
+        // Create an empty array to store results
+        $result = [];
+
+        // Loop through the array to compute the absolute value for each element
+        foreach ($arr as $key => $value) {
+            if (is_array($value)) {
+                $result[$key] = self::abs($value); // Recursive call for nested arrays
+            } else {
+                $result[$key] = abs($value); // Use PHP's built-in abs function
+            }
+        }
+
+        return $result;
+    }
 
 
 }

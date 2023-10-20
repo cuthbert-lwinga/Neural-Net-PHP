@@ -11,7 +11,7 @@ $dense1 = new Layer_Dense(2, 64);
 $activation1 = new Activation_ReLU();
 $dense2 = new Layer_Dense(64, 3);
 $loss_activation = new Activation_Softmax_Loss_CategoricalCrossentropy();
-$optimizer = new Optimizer_SGD($learning_rate=1,$decay = 1e-2);
+$optimizer = new Optimizer_SGD($learning_rate=0.85);
 
 $lossTrend = [];
 $accTrend = [];
@@ -49,7 +49,6 @@ for ($epoch = 0; $epoch <= 10000; $epoch++) {
 	$optimizer->pre_update_params();
 	$optimizer->update_params($dense1);
 	$optimizer->update_params($dense2);
-	
 	$optimizer->post_update_params();
 
 	

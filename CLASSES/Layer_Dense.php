@@ -17,33 +17,72 @@ class Layer_Dense{
     public $bias_momentums = NULL;
     public $weight_cache = NULL;
     public $bias_cache = NULL;
-    function __construct($n_inputs,$n_neurons){
-        $this->weights = np::multiply(np::random()->rand($n_inputs,$n_neurons), 1e-4); // book is 0.01, but this performs way better. I suspsect it's somthing to do with my random 
-        $zerosMatrix = np::zeros(1,$n_neurons);
-        $this->biases  = $zerosMatrix;
+    public $weight_regularizer_l1;
+    public $weight_regularizer_l2;
+    public $bias_regularizer_l1;
+    public $bias_regularizer_l2;
+
+    public function __construct($n_inputs, $n_neurons, 
+                                $weight_regularizer_l1 = 0, $weight_regularizer_l2 = 0,
+                                $bias_regularizer_l1 = 0, $bias_regularizer_l2 = 0) {
+        $this->weights = np::multiply(np::random()->rand($n_inputs, $n_neurons), 0.001);
+        $this->biases = np::zeros(1, $n_neurons);
+
+        $this->weight_regularizer_l1 = $weight_regularizer_l1;
+        $this->weight_regularizer_l2 = $weight_regularizer_l2;
+        $this->bias_regularizer_l1 = $bias_regularizer_l1;
+        $this->bias_regularizer_l2 = $bias_regularizer_l2;
     }
 
-    public function forward($input){
-        $this->inputs = $input;
-        // issue is here weight and inputs are massive
-        
-        $dot = np::dot($input,$this->weights);
-
-
+    public function forward($inputs){
+        $this->inputs = $inputs;
+        $dot = np::dot($inputs,$this->weights);
         $this->output = np::add($dot,$this->biases);
+// self.inputs = inputs
+//         self.output = np.dot(inputs, self.weights) + self.biases
+        
     }
+
+    // public function backward($dvalues) {
+    //     $this->dweights = np::dot(np::transpose($this->inputs), $dvalues);
+    //     $this->dbiases = np::sum($dvalues,0,true); 
+    //     $this->dinputs = np::dot($dvalues,np::transpose($this->weights));
+    // }
 
     public function backward($dvalues) {
-    //         np::displayMatrix($dvalues,1);
-    // echo "\n\n\n\n";
-        $this->dweights = np::dot(np::transpose($this->inputs), $dvalues);
-        $this->dbiases = np::sum($dvalues,0,true);
-        $transformedWeights = np::transpose($this->weights); 
+    // Gradients on parameters
+    $this->dweights = np::dot(np::transpose($this->inputs), $dvalues);
+    $this->dbiases = np::sum($dvalues, 0, true);
 
-       // echo json_encode(np::shape($dvalues))." = ".json_encode(np::shape($dvalues))." \n";
-        $this->dinputs = np::dot($dvalues,$transformedWeights);
-        
+    // Gradients on regularization
+    // L1 on weights
+    if ($this->weight_regularizer_l1 > 0) {
+        $dL1 = np::ones_like($this->weights,1);
+        $dL1 = np::apply_relu_backwards($this->weights,$dL1,0,-1,$strict = false);
+        $this->dweights = np::add($this->dweights, np::multiply($dL1,$this->weight_regularizer_l1));
     }
+
+    // L2 on weights
+    if ($this->weight_regularizer_l2 > 0) {
+        $this->dweights = np::add($this->dweights, np::multiply($this->weights,(2 * $this->weight_regularizer_l2)));
+    }
+
+    // L1 on biases
+    if ($this->bias_regularizer_l1 > 0) {
+        $dL1 = np::ones_like($this->biases);
+        $dL1 = np::apply_relu_backwards($this->biases,$dL1,0,-1,$strict = false);
+        $this->dbiases = np::add($this->dbiases, np::multiply($dL1,$this->bias_regularizer_l1));
+    }
+
+    // L2 on biases
+    if ($this->bias_regularizer_l2 > 0) {
+        $this->dbiases = np::add($this->dbiases, np::multiply($this->biases,(2 * $this->bias_regularizer_l2)));
+    }
+
+    // Gradient on values
+    $this->dinputs = np::dot($dvalues, np::transpose($this->weights));
+}
+
 
 
 }

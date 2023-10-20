@@ -22,7 +22,6 @@ class Activation_Relu{
 
     public function backward($dvalues) {
         $this->dinputs = $dvalues;
-        //$this->dinputs = np::ReLU($this->inputs);
         $this->dinputs = np::apply_relu_backwards($this->inputs, $this->dinputs);
     }
 

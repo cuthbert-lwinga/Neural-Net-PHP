@@ -725,7 +725,7 @@ public function testJacobianMatrix() {
     foreach ($result as $i => $subArray) {
         foreach ($subArray as $j => $value) {
             // Using assertEquals with a delta for floating-point comparison
-            $this->assertTrue(abs($expected[$i][$j] - $value) < 0.0001);
+            $this->assertTrue(abs($expected[$i][$j] - $value) < 0.00001);
         }
     }
 }

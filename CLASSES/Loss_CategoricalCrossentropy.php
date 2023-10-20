@@ -4,6 +4,33 @@ use NameSpaceNumpyLight\NumpyLight as np; // simulating numpy from python
 use NameSpaceRandomGenerator\RandomGenerator;
 
 class Loss {
+
+public function regularization_loss($layer) {
+        $regularization_loss = 0;
+
+        // L1 regularization - weights
+        if ($layer->weight_regularizer_l1 > 0) {
+            $regularization_loss += $layer->weight_regularizer_l1 * np::sum(np::abs($layer->weights));
+        }
+
+        // L2 regularization - weights
+        if ($layer->weight_regularizer_l2 > 0) {
+            $regularization_loss += $layer->weight_regularizer_l2 * np::sum(np::multiply($layer->weights, $layer->weights));
+        }
+
+        // L1 regularization - biases
+        if ($layer->bias_regularizer_l1 > 0) {
+            $regularization_loss += $layer->bias_regularizer_l1 * np::sum(np::abs($layer->biases));
+        }
+
+        // L2 regularization - biases
+        if ($layer->bias_regularizer_l2 > 0) {
+            $regularization_loss += $layer->bias_regularizer_l2 * np::sum(np::multiply($layer->biases, $layer->biases));
+        }
+
+        return $regularization_loss;
+    }
+
     public function calculate($output, $y) {
         $sample_losses = $this->forward($output, $y);
         $data_loss = np::mean($sample_losses);
@@ -12,7 +39,7 @@ class Loss {
 }
 
 class Loss_CategoricalCrossentropy extends Loss {
-    public $dinputs; // i added this because of deprecation, could be an issue
+    public $dinputs; // i added this because of deprecation could be an issue
     public function forward($y_pred, $y_true) {
         $samples = count($y_pred);
 
