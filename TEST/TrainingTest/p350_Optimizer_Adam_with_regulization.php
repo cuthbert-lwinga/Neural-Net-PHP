@@ -9,12 +9,15 @@ use NameSpaceOptimizerAdagrad\Optimizer_Adagrad;
 use NameSpaceOptimizerRMSprop\Optimizer_RMSprop;
 
 $dataAnalyzed = "spiral_data";
-list($X, $y) = NumpyLight::spiral_data(100, 3);
+list($X, $y) = NumpyLight::spiral_data(1000, 3);
+# Create test dataset
+list($X_test, $y_test) = NumpyLight::spiral_data(1000, 3);
+
 $filename = pathinfo(basename($_SERVER['SCRIPT_NAME']), PATHINFO_FILENAME);
 // Create layers and activations
-$dense1 = new Layer_Dense(2, 64); //,$weight_regularizer_l2 = 5e-4 ,$bias_regularizer_l2 = 5e-4;
+$dense1 = new Layer_Dense(2, 512,$weight_regularizer_l2 = 5e-4 ,$bias_regularizer_l2 = 5e-4);
 $activation1 = new Activation_ReLU();
-$dense2 = new Layer_Dense(64, 3);
+$dense2 = new Layer_Dense(512, 3);
 $loss_activation = new Activation_Softmax_Loss_CategoricalCrossentropy();
 $optimizer = new Optimizer_Adam($learning_rate = 0.02 , $decay = 5e-7 );
 $lossTrend = [];
@@ -66,6 +69,17 @@ for ($epoch = 0; $epoch <= 10000; $epoch++) {
 	$optimizer->post_update_params();
 
 }
+
+
+	$dense1->forward($X_test);
+	$activation1->forward($dense1->output);
+	$dense2->forward($activation1->output);
+	
+	$loss = $loss_activation->forward($dense2->output, $y_test);	
+	
+	$acc = NumpyLight::accuracy($loss_activation->output, $y_test);
+
+	echo "\n\n validation, acc: $acc , loss: $loss \n\n";
 
 
 $plotter = new LinePlotter(500, 500);

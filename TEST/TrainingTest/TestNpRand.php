@@ -5,8 +5,15 @@ use NameSpaceRandomGenerator\RandomGenerator;
 use NameSpaceActivationRelu\Activation_Relu;
 use NameSpaceOptimizerSGD\Optimizer_SGD;
 
+$dropout_rate = 0.2;
+$n = 1;
+$p = 1 - $dropout_rate;
+
+$shape = [3, 3];
+$output = NumpyLight::random()->binomial_rand($n, $p, $shape);
+print_r($output);
 // Load JSON data
-$json_data = file_get_contents('/Users/cuthbertlwinga/Documents/projects/PHP/Neural-Net-PHP/TEST/Neural_Networks_Components/neural_network_data.json');
+// $json_data = file_get_contents('/Users/cuthbertlwinga/Documents/projects/PHP/Neural-Net-PHP/TEST/Neural_Networks_Components/neural_network_data.json');
 // echo $_SERVER["DOCUMENT_ROOT"].'/TEST/TrainingTest/neural_network_data.json';
 // $json_data = file_get_contents($_SERVER["DOCUMENT_ROOT"].'/TEST/TrainingTest/neural_network_data.json');
 // $data = json_decode($json_data, true);

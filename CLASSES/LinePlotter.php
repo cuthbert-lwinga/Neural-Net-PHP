@@ -49,34 +49,6 @@ private function normalizePoints($points) {
         return imagecolorallocate($this->image, rand(0, 255), rand(0, 255), rand(0, 255));
     }
 
-    // public function plotLine($yValues, $colorName) {
-    //     $step = $this->width / count($yValues);
-    //     $prevX = 0;
-    //     $prevY = $yValues[0];
-
-    //     for ($i = 1; $i < count($yValues); $i++) {
-    //         $x = $i * $step;
-    //         imageline($this->image, $prevX, $prevY, $x, $yValues[$i], $this->colors[$colorName]);
-    //         $prevX = $x;
-    //         $prevY = $yValues[$i];
-    //     }
-    // }
-
-    // public function plotPoints($points, $groups) {
-    //     $uniqueGroups = array_unique($groups);
-    //     foreach ($uniqueGroups as $group) {
-    //         if (!isset($this->assignedColors[$group])) {
-    //             $this->assignedColors[$group] = $this->getRandomColor();
-    //         }
-    //     }
-
-    //     for ($i = 0; $i < count($points); $i++) {
-    //         $x = $points[$i][0];
-    //         $y = $points[$i][1];
-    //         $group = $groups[$i];
-    //         imagefilledellipse($this->image, $x, $y, 10, 10, $this->assignedColors[$group]);
-    //     }
-    // }
 
 public function plotLine($yValues, $colorName) {
     // Normalize the y-values first
@@ -117,7 +89,7 @@ public function plotPoints($points, $groups) {
         $x = $normalizedPoints[$i][0];
         $y = $normalizedPoints[$i][1];
         $group = $groups[$i];
-        imagefilledellipse($this->image, $x, $y, 10, 10, $this->assignedColors[$group]);
+        imagefilledellipse($this->image, $x, $y, 4, 4, $this->assignedColors[$group]);
     }
 }
 
@@ -139,17 +111,5 @@ public function plotPoints($points, $groups) {
     }
 }
 
-// Usage example:
-// $plotter = new LinePlotter(500, 500);
-// $plotter->setColor('green', 0, 255, 0);
-
-// $points = [[50, 100], [100, 200], [150, 150], [200, 250], [250, 300], [300, 100]];
-// $groups = [0, 0, 0, 0, 0, 1];
-
-// $lineYValues = [100, 150, 200, 250, 300, 350];
-
-// $plotter->plotLine($lineYValues, 'green');
-// $plotter->plotPoints($points, $groups);
-// $plotter->save('plot.png');
 
 ?>
