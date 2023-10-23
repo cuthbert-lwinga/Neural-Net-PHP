@@ -13,20 +13,20 @@
 - [License](#license-📝)
 
 ## Introduction 🎉
-Hey there, machine learning enthusiasts! 🌟 Welcome to Neural-Net-PHP, where we're making machine learning in PHP not just possible but super fun! 🎉 Inspired by the awesome book "Neural Networks from Scratch in Python" by Harrison Kinsley, we're on a mission to jazz up the PHP world with neural networks! 🧠🔥
+Welcome to Neural-Net-PHP. This library provides a framework for implementing neural networks in PHP. It's an adaptation inspired by the book "Neural Networks from Scratch in Python" by Harrison Kinsley.
 
 ## Installation 🛠
 
-Clone this baby and let Composer work its magic. 🪄
+To set up the library, clone the repository and initialize it with Composer.
 
 ```bash
-git clone https://github.com/your-username/Neural-Net-PHP.git
+git clone https://github.com/cuthbert-lwinga/Neural-Net-PHP.git
 cd Neural-Net-PHP
 composer install
 ```
 
 ## Usage 🚀
-Ready for takeoff! 🚀 Just import the library and unleash the neural network goodness! 🌈 Detailed docs are coming soon (because I am obsessed lmao 😅 ).
+To utilize the library, simply import the relevant modules. Comprehensive documentation and usage guidelines will be available soon.
 
 ```php
 // Some uber-cool example code goes here!
@@ -34,7 +34,7 @@ Ready for takeoff! 🚀 Just import the library and unleash the neural network g
 
 ## Testing 🔬
 
-Hold your horses! 🐴 Before we dive into the cool ML stuff, let's make sure everything's working as it should. Run these tests to keep your neural nets in tip-top shape! 👌
+To set up the library, clone the repository and initialize it with Composer.
 
 ```bash
 ./vendor/bin/phpunit
@@ -54,20 +54,20 @@ All tests should pass, and we're talking zero room for error—tolerance of just
 
 ## Features ✨
 
-- 🧠 Neural networks in PHP? Yes, please!
-- 🎉 Fun and easy to use! (Just like me!)
+- 🧠 Implementation of neural networks in PHP.
+- 🎉 Intuitive and user-friendly interface.
 - 🔬 Comprehensive unit tests to keep you on track!
-- ... and more awesomeness coming your way! 🌈
+- 🛠 Supports various optimizers including Adam, Adagrad, RMSprop, and basic Stochastic Gradient Descent (SGD)
 
 ## Technical Considerations 🤔
 
-- PHP isn't Python, and that's okay! 🤷‍♂️ Some things might behave a smidge differently.
+- PHP isn't Python, and that's okay! 🤷🏿‍♂️ Some things might behave a smidge differently.
 - Decimal places got you down? Don't worry, our tests have got you covered with a tiny-tiny tolerance! 🎯
-- I made NumpyLight by painfully running python and building the NumpyLight in its image
+- NumpyLight was developed as an internal utility, mirroring the functionality of Python's Numpy.
 
-## Acknowledgements 🙏
+## Acknowledgements 🙏🏿
 
-- Huge shoutout to Harrison Kinsley for his must-read book "Neural Networks from Scratch in Python"! 📚 You rock, man! 🤘
+- Gratitude to Harrison Kinsley for his pivotal work "Neural Networks from Scratch in Python"(https://nnfs.io/) ! 📚 You rock, man! 🤘🏿
 
 ## License 📝
 
