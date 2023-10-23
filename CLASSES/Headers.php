@@ -11,4 +11,5 @@ include_once("Optimizer_SGD.php");
 include_once("Optimizer_Adagrad.php");
 include_once("Optimizer_RMSprop.php");
 include_once("LinePlotter.php");
+include_once("Layer_Dropout.php");
 ?>

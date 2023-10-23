@@ -10,7 +10,7 @@ $n = 1;
 $p = 1 - $dropout_rate;
 
 $shape = [3, 3];
-$output = NumpyLight::random()->binomial_rand($n, $p, $shape);
+$output = NumpyLight::random()->binomial($n, $p, $shape);
 print_r($output);
 // Load JSON data
 // $json_data = file_get_contents('/Users/cuthbertlwinga/Documents/projects/PHP/Neural-Net-PHP/TEST/Neural_Networks_Components/neural_network_data.json');

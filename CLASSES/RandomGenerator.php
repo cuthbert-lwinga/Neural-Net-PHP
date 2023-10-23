@@ -45,7 +45,7 @@ class RandomGenerator {
     }
 
 
-public function binomial_rand($n, $p, $shape_or_int) {
+public function binomial($n, $p, $shape_or_int) {
     if (is_int($shape_or_int)) {
         $result = [];
         for ($i = 0; $i < $shape_or_int; $i++) {
@@ -59,7 +59,7 @@ public function binomial_rand($n, $p, $shape_or_int) {
         $dimension = array_shift($shape);
         $result = [];
         for ($i = 0; $i < $dimension; $i++) {
-            $result[] = self::binomial_rand($n, $p, $shape);
+            $result[] = self::binomial($n, $p, $shape);
         }
         return $result;
     }
