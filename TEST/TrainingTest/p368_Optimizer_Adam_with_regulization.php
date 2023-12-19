@@ -15,12 +15,12 @@ list($X_test, $y_test) = NumpyLight::spiral_data(1000, 3);
 
 $filename = pathinfo(basename($_SERVER['SCRIPT_NAME']), PATHINFO_FILENAME);
 // Create layers and activations,,$weight_regularizer_l2 = 5e-4 ,$bias_regularizer_l2 = 5e-4
-$dense1 = new Layer_Dense(2, 64);
+$dense1 = new Layer_Dense(2, 512,$weight_regularizer_l2 = 5e-4 ,$bias_regularizer_l2 = 5e-4);
 $activation1 = new Activation_ReLU();
 $dropout1 = new Layer_Dropout(0.1);
-$dense2 = new Layer_Dense(64, 3);
+$dense2 = new Layer_Dense(512, 3);
 $loss_activation = new Activation_Softmax_Loss_CategoricalCrossentropy();
-$optimizer = new Optimizer_Adam($learning_rate = 0.02 , $decay = 5e-7 );
+$optimizer = new Optimizer_Adam($learning_rate = 0.05 , $decay = 5e-4 );
 $lossTrend = [];
 $accTrend = [];
 $lrTrend = [];

@@ -1129,6 +1129,118 @@ public function testActivation_Softmax_Loss_CategoricalCrossentropy_Backward()
     $this->assertEqualsWithDelta($expected_dinputs, $calculated_dinputs, 0.0001,"Backward pass does not match expected output");
 }
 
+public function testLossBinaryCrossentropyForwardAndBackward()
+{
+    echo "\nTESTING....[Loss_BinaryCrossentropy Forward and Backward Pass]\n";
+
+    $loss_binary_crossentropy = new Loss_BinaryCrossentropy();
+
+    // Inputs from Python
+    $y_pred = [
+        [0.5488135039273248],
+        [0.7151893663724195],
+        [0.6027633760716439],
+        [0.5448831829968969],
+        [0.4236547993389047]
+    ];
+    $y_true = [
+        [1],
+        [0],
+        [0],
+        [1],
+        [0]
+    ];
+
+    // Expected forward output from Python (loss values)
+    $expected_forward_output = [
+        0.5999965965916227,
+        1.255930762965838,
+        0.9232231458040688,
+        0.6071838504186235,
+        0.5510484910954992
+    ];
+
+    // Perform forward pass
+    $forward_output = $loss_binary_crossentropy->forward($y_pred, $y_true);
+
+    // Test forward pass
+
+    $this->assertEqualsWithDelta($expected_forward_output, $forward_output, 0.00001, "Forward pass does not match expected output");
+
+    // Assuming a gradient of 1 for the backward pass
+    $dvalues = [
+        [1],
+        [1],
+        [1],
+        [1],
+        [1]
+    ];
+
+    // Expected backward output from Python (gradient values)
+    $expected_backward_output = [
+        [-0.200000020000002],
+        [2000000.0010527116],
+        [2000000.0010527116],
+        [-0.200000020000002],
+        [2000000.0010527116]
+    ];
+
+    // Perform backward pass
+    $loss_binary_crossentropy->backward($dvalues, $y_true);
+    $backward_output = $loss_binary_crossentropy->dinputs;
+
+    // Test backward pass
+    $this->assertEqualsWithDelta($expected_backward_output, $backward_output, 0.00001, "Backward pass does not match expected output");
+}
+
+
+public function testActivationSigmoidForwardAndBackward()
+{
+    echo "\nTESTING....[Activation_Sigmoid Forward and Backward Pass]\n";
+
+    $sigmoid = new Activation_Sigmoid();
+
+    // Inputs from Python
+    $inputs = [
+        [1.764052345967664, 0.4001572083672233, 0.9787379841057392],
+        [2.240893199201458, 1.8675579901499675, -0.977277879876411],
+        [0.9500884175255894, -0.1513572082976979, -0.10321885179355784]
+    ];
+
+    // Expected forward output from Python
+    $expected_forward_output = [
+        [0.8537164618123155, 0.59872543052593, 0.7268577330436564],
+        [0.903862101196981, 0.8661754636349963, 0.27343224558007506],
+        [0.7211329591538593, 0.46223277121248857, 0.4742181732354791]
+    ];
+
+    // Perform forward pass
+    $sigmoid->forward($inputs);
+    $forward_output = $sigmoid->output;
+
+    // Test forward pass
+    $this->assertEqualsWithDelta($expected_forward_output, $forward_output, 0.0001, "Forward pass does not match expected output");
+
+    // Assuming a gradient of 1 for the backward pass
+    $dvalues = [[1, 1, 1], [1, 1, 1], [1, 1, 1]];
+
+    // Expected backward output from Python
+    $expected_backward_output = [
+        [0.12488466464297673, 0.24025328936746979, 0.1985355689582931],
+        [0.08689540321675951, 0.1159155298316955, 0.1986670526571126],
+        [0.20110021437585757, 0.24857363642971178, 0.24933529740868424]
+    ];
+
+    // Perform backward pass
+    $sigmoid->backward($dvalues);
+    $backward_output = $sigmoid->dinputs;
+
+    // Test backward pass
+    $this->assertEqualsWithDelta($expected_backward_output, $backward_output, 0.0001, "Backward pass does not match expected output");
+}
+
+
+
 
 
 }

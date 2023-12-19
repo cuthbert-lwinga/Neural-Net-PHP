@@ -11,7 +11,10 @@ $dataAnalyzed = "mandelbrot_spiral_data";
 list($X, $y) = NumpyLight::mandelbrotData(500, 500);; // Call your Mandelbrotized spiral data function
 $filename = pathinfo(basename($_SERVER['SCRIPT_NAME']), PATHINFO_FILENAME);
 
-$plotterTemp = new LinePlotter(500, 500);
-$plotterTemp->plotPoints($X, $y);
-$plotterTemp->save("images/".$filename."_$dataAnalyzed.png");
+// $plotterTemp = new LinePlotter(500, 500);
+// $plotterTemp->plotPoints($X, $y);
+// $plotterTemp->save("images/".$filename."_$dataAnalyzed.png");
+
+// echo json_encode(NumpyLight::displayMatrix(NumpyLight::reshape($y, [-1,1])));
+
 ?>

@@ -12,4 +12,6 @@ include_once("Optimizer_Adagrad.php");
 include_once("Optimizer_RMSprop.php");
 include_once("LinePlotter.php");
 include_once("Layer_Dropout.php");
+include_once("Loss_BinaryCrossentropy.php");
+include_once("Activation_Sigmoid.php");
 ?>

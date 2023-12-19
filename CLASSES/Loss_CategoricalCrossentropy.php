@@ -1,4 +1,5 @@
 <?php
+// namespace NameSpaceLossBinaryCrossentropy;
 include_once("Headers.php");
 use NameSpaceNumpyLight\NumpyLight as np; // simulating numpy from python 
 use NameSpaceRandomGenerator\RandomGenerator;
@@ -68,4 +69,87 @@ class Loss_CategoricalCrossentropy extends Loss {
 
     }
 }
+
+
+class Loss_BinaryCrossentropy extends Loss{
+    
+    public $dinputs;
+
+    public function forward($y_pred, $y_true) {
+        // Clip data to prevent division by 0
+
+        
+        $y_pred_clipped = np::clip($y_pred, 1e-7, 1 - 1e-7);
+
+        // Calculate sample-wise loss
+        $positive_loss = np::multiply($y_true, np::log($y_pred_clipped));
+
+        $negative_loss = np::multiply(
+                            np::subtract(
+                                1, 
+                                $y_true
+                            ), 
+                            np::log(
+                                np::subtract(
+                                    1, 
+                                    $y_pred_clipped
+                                )
+                            )
+                        );
+
+        $sample_losses = np::multiply(
+                            -1,
+                            np::add(
+                                $positive_loss,
+                                $negative_loss
+                            )
+                        );
+        // Calculate mean loss
+        $sample_losses = np::mean($sample_losses,$axis = -1);
+
+
+        return $sample_losses;
+    }
+
+    public function backward($dvalues, $y_true) {
+        // Number of samples
+        $samples = count($dvalues);
+        // Number of outputs in every sample
+        $outputs = count($dvalues[0]);
+
+        // Clip data to prevent division by 0
+        $clipped_dvalues = np::clip($dvalues, 1e-7, 1 - 1e-7);
+
+        // Calculate gradient
+        $positive_gradient = np::divide(
+                                $y_true, 
+                                $clipped_dvalues
+                            );
+
+        $negative_gradient = np::divide(
+                                np::subtract(
+                                    1,
+                                    $y_true
+                                ), 
+                                np::subtract(
+                                    1, 
+                                    $clipped_dvalues
+                                )
+                            );
+        
+        $this->dinputs = np::multiply(
+                            -1,
+                            np::subtract(
+                                $positive_gradient,
+                                $negative_gradient
+                            )
+                        );
+
+        $this->dinputs = np::divide($this->dinputs, $outputs);
+        
+        // Normalize gradient
+        $this->dinputs = np::divide($this->dinputs, $samples);
+    }
+}
+
 ?>
