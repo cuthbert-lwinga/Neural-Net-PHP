@@ -5,6 +5,13 @@ use NameSpaceNumpyLight\NumpyLight as np; // simulating numpy from python
 use NameSpaceRandomGenerator\RandomGenerator;
 
 class Loss {
+ protected $trainable_layers;
+
+    
+    // Method to remember trainable layers
+    public function rememberTrainableLayers($trainable_layers) {
+        $this->trainable_layers = $trainable_layers;
+    }
 
 public function regularization_loss($layer) {
         $regularization_loss = 0;
@@ -32,11 +39,37 @@ public function regularization_loss($layer) {
         return $regularization_loss;
     }
 
-    public function calculate($output, $y) {
+    // public function calculate($output, $y) {
+    //     $sample_losses = $this->forward($output, $y);
+    //     $data_loss = np::mean($sample_losses);
+    //     return $data_loss;
+    // }
+
+
+    // Modified calculate method
+    public function calculate($output, $y, $include_regularization = false) {
+        // Calculate data loss
         $sample_losses = $this->forward($output, $y);
         $data_loss = np::mean($sample_losses);
-        return $data_loss;
+
+
+        if (!$include_regularization) {
+            return $data_loss;
+        }
+
+        // Calculate regularization loss
+        $regularization_loss = 0;
+        if (is_array($this->trainable_layers) || is_object($this->trainable_layers)) {
+
+        foreach ($this->trainable_layers as $layer) {
+            $regularization_loss += $this->regularization_loss($layer);
+        }
+        
+        }
+
+        return [$data_loss, $regularization_loss];
     }
+
 }
 
 class Loss_CategoricalCrossentropy extends Loss {
@@ -104,7 +137,9 @@ class Loss_BinaryCrossentropy extends Loss{
                                 $negative_loss
                             )
                         );
+
         // Calculate mean loss
+        
         $sample_losses = np::mean($sample_losses,$axis = -1);
 
 
@@ -137,7 +172,7 @@ class Loss_BinaryCrossentropy extends Loss{
                                 )
                             );
         
-        $this->dinputs = np::multiply(
+        $temp = np::multiply(
                             -1,
                             np::subtract(
                                 $positive_gradient,
@@ -145,11 +180,99 @@ class Loss_BinaryCrossentropy extends Loss{
                             )
                         );
 
-        $this->dinputs = np::divide($this->dinputs, $outputs);
+        $this->dinputs = np::divide($temp, $outputs);
         
         // Normalize gradient
         $this->dinputs = np::divide($this->dinputs, $samples);
     }
 }
+
+
+
+class Loss_MeanSquaredError extends Loss {
+
+    public $dinputs;
+
+    // Forward pass
+    public function forward($y_pred, $y_true) {
+        // Calculate loss
+        $sample_losses = np::mean(
+            np::pow(
+                    np::subtract($y_true, 
+                                $y_pred)
+                , 2
+            )
+            , $axis = -1);
+
+        // Return losses
+        return $sample_losses;
+    }
+
+    // Backward pass
+    public function backward($dvalues, $y_true) {
+        // Number of samples
+        $samples = count($dvalues);
+
+        // Number of outputs in every sample
+        $outputs = count($dvalues[0]);
+
+        // Gradient on values
+        $this->dinputs = np::divide( 
+                np::subtract($y_true, $dvalues), 
+            $outputs);
+
+        $this->dinputs = np::multiply(-2,$this->dinputs);
+
+        // Normalize gradient
+        $this->dinputs = np::divide($this->dinputs, $samples);
+    }
+}
+
+
+
+class Loss_MeanAbsoluteError extends Loss {
+
+    public $dinputs;
+
+    // Forward pass
+    public function forward($y_pred, $y_true) {
+        // Calculate loss
+        $sample_losses = np::mean(
+            np::abs(
+                np::subtract($y_true, $y_pred)
+            ), 
+            $axis = -1);
+
+        // Return losses
+        return $sample_losses;
+    }
+
+    // Backward pass
+    public function backward($dvalues, $y_true) {
+        // Number of samples
+        $samples = count($dvalues);
+
+        // Number of outputs in every sample
+        $outputs = count($dvalues[0]);
+
+        // Calculate gradient
+        $this->dinputs = np::divide(
+            np::sign(
+                np::subtract(
+                    $y_true, 
+                    $dvalues
+                )
+            ), 
+            $outputs
+        );
+
+        // Normalize gradient
+        $this->dinputs = np::divide($this->dinputs, $samples);
+        
+    }
+}
+
+
+
 
 ?>

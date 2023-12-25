@@ -25,7 +25,7 @@ class Layer_Dense{
     public function __construct($n_inputs, $n_neurons, 
                                 $weight_regularizer_l1 = 0, $weight_regularizer_l2 = 0,
                                 $bias_regularizer_l1 = 0, $bias_regularizer_l2 = 0) {
-        $this->weights = np::multiply(np::random()->rand($n_inputs, $n_neurons), 0.001);
+        $this->weights = np::multiply(np::random()->rand($n_inputs, $n_neurons), 0.1);
         $this->biases = np::zeros(1, $n_neurons);
 
         $this->weight_regularizer_l1 = $weight_regularizer_l1;

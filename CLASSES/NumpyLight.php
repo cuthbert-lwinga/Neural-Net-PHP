@@ -2,8 +2,12 @@
 namespace NameSpaceNumpyLight;
 
 include_once("Headers.php");
-
+include_once("ProcessManager.php"); // important
 use NameSpaceRandomGenerator\RandomGenerator;
+use ProcessManager\ProcessManager;
+use NameSpaceArrayFileHandler\ArrayFileHandler;
+use Exception;
+
 
 class NumpyLight{
 
@@ -67,6 +71,10 @@ public static function ones_like($matrix,$n=1) {
     }
 }
 
+public static function areShapesEqual($array1, $array2) {
+    return self::shape($array1) == self::shape($array2);
+}
+
 public static function shape($array) {
     $shape = [];
     $current_array = $array;
@@ -77,7 +85,206 @@ public static function shape($array) {
     return $shape;
 }
 
-public static function dot($a, $b) {
+
+// public static function dot($a, $b) {
+//     $shapeA = self::shape($a);
+//     $shapeB = self::shape($b);
+
+//         // Check for shape compatibility
+
+//     // echo json_encode(self::shape($a))." = ".json_encode(self::shape($b))." \n";
+
+//     if (end($shapeA) !== $shapeB[0]) {
+//         throw new Exception("Shapes " . implode(",", $shapeA) . " and " . implode(",", $shapeB) . " not aligned.");
+//     }
+
+//     $result = [];
+//     for ($i = 0; $i < $shapeA[0]; $i++) {
+//         $row = [];
+//         for ($j = 0; $j < $shapeB[1]; $j++) {
+//             $sum = 0;
+//             for ($k = 0; $k < $shapeA[1]; $k++) {
+//                 $sum += $a[$i][$k] * $b[$k][$j];
+//             }
+//             $row[] = $sum;
+//         }
+//         $result[] = $row;
+//     }
+//     return $result;
+// }
+
+ public static function dot($a, $b)
+    {
+        $shapeA = self::shape($a);
+        $shapeB = self::shape($b);
+
+        if (end($shapeA) !== $shapeB[0]) {
+            throw new Exception("Shapes " . implode(",", $shapeA) . " and " . implode(",", $shapeB) . " not aligned.");
+        }
+
+        // if (function_exists('pcntl_fork')) {
+        //     return self::parallelDotProduct($a, $b, $shapeA, $shapeB);
+        // } else {
+            return self::sequentialDotProduct($a, $b, $shapeA, $shapeB);
+        //}
+    }
+
+
+
+public static function extractRowAndColumn($matrixA, $matrixB, $i) {
+    // Extract the ith row from matrixA
+    $row = $matrixA[$i];
+
+    // Extract the ith column from matrixB
+    $column = array_column($matrixB, $i);
+
+    return [$row, $column];
+}
+
+
+public static function extractRow($matrix, $i) {
+    // Extract the ith row from matrix
+    $row = $matrix[$i];
+    return $row;
+}
+
+public static function extractColumn($matrix, $i) {
+    // Extract the ith row from matrix
+    $column = array_column($matrix, $i);
+
+    return $column;
+}
+
+
+
+public static function dotProduct($array1, $array2) {
+    $sum = 0;
+    $length = count($array1);
+    for ($i = 0; $i < $length; $i++) {
+        $sum += $array1[$i] * $array2[$i];
+    }
+    return $sum;
+}
+
+private static function parallelDotProduct($a, $b, $shapeA, $shapeB)
+{
+    // $startTime = microtime(true); // Start time
+    $processManager = new ProcessManager();
+    $result = array_fill(0, $shapeA[0], array_fill(0, $shapeB[1], null));
+
+    $tempDir = sys_get_temp_dir();
+    $tempFiles = [];
+
+    for ($i = 0; $i < $shapeA[0]; $i++) {
+        $tempFile = tempnam($tempDir, 'dot_product_row_');
+        $tempFiles[$i] = $tempFile;
+
+        $processManager->run(function() use ($a, $b, $i, $shapeA, $shapeB, $tempFile) {
+            $rowResult = [];
+            for ($j = 0; $j < $shapeB[1]; $j++) {
+                $sum = 0;
+                for ($k = 0; $k < $shapeA[1]; $k++) {
+                    $sum += $a[$i][$k] * $b[$k][$j];
+                }
+                $rowResult[] = $sum;
+            }
+            file_put_contents($tempFile, serialize($rowResult));
+        });
+
+    }
+
+ 
+    $processManager->waitForAllProcesses();
+
+
+    for ($i = 0; $i < $shapeA[0]; $i++) {
+        $rowResult = unserialize(file_get_contents($tempFiles[$i]));
+        $result[$i] = $rowResult;
+        unlink($tempFiles[$i]); // Delete the temporary file
+    }
+
+
+    return $result;
+}
+
+
+public static function parallelDotProducttest($a, $b, $shapeA, $shapeB)
+{
+    // $startTime = microtime(true); // Start time
+    $processManager = new ProcessManager();
+
+    for ($i=0; $i < $shapeA[0]; $i++) { 
+    
+        $row = NumpyLight::extractRow($a,0);
+
+        $processManager->run(function() use ($b, $row, $shapeB) {
+                
+                $rowOuput = [];
+
+                for ($j=0; $j < $shapeB[1]; $j++) { 
+                    $column = NumpyLight::extractColumn($b,$j);
+                    $rowOuput[] = NumpyLight::dotProduct($row, $column);
+                }
+                
+                ArrayFileHandler::appendArray($rowOuput);
+
+            });
+    }
+
+
+ 
+    // $processManager->waitForAllProcesses();
+
+     return [];//self::retrieveDataAsMatrix($tempFile);
+
+
+}
+
+
+
+    private static function sequentialDotProduct($a, $b, $shapeA, $shapeB)
+    {
+        $result = [];
+        for ($i = 0; $i < $shapeA[0]; $i++) {
+            $row = [];
+            for ($j = 0; $j < $shapeB[1]; $j++) {
+                $sum = 0;
+                for ($k = 0; $k < $shapeA[1]; $k++) {
+                    $sum += $a[$i][$k] * $b[$k][$j];
+                }
+                $row[] = $sum;
+            }
+            $result[] = $row;
+        }
+        return $result;
+    }
+
+
+// Function to append an array to a file
+public static function appendArrayToFile($tempFile, $data) {
+    $serializedData = serialize($data);
+    file_put_contents($tempFile, $serializedData . PHP_EOL, FILE_APPEND);
+}
+
+// Function to retrieve the data as a matrix
+public static function retrieveDataAsMatrix($tempFile) {
+    $matrix = [];
+    $lines = file($tempFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+    if ($lines) {
+        foreach ($lines as $line) {
+            $data = unserialize($line);
+            if ($data !== false) {
+                $matrix[] = $data;
+            }
+        }
+    }
+
+    return $matrix;
+}
+
+
+public static function dotOld($a, $b) {
     $shapeA = self::shape($a);
     $shapeB = self::shape($b);
 
@@ -135,11 +342,6 @@ public static function BinaryClassificationAccuracy($matrix, $true_values){
         // Assuming $matrix[$i] is an array with a single probability value
         $prediction = ($matrix[$i][0] > 0.5) ? 1 : 0;
 
-       // if ($matrix[$i][0] > 0.5) {
-       //  var_dump($prediction);
-       //  var_dump($true_values[$i][0]);
-       //  die();
-       //  }
 
         if ($prediction == $true_values[$i][0]) {
             $correct++;
@@ -1546,6 +1748,18 @@ public static function hasNAN($matrix) {
     return false;
 }
 
+public static function sine_data($samples = 1000) {
+    $X = [];
+    $y = [];
+
+    for ($i = 0; $i < $samples; $i++) {
+        $X[$i][0] = $i / $samples;
+        $y[$i][0] = sin(2 * M_PI * $X[$i][0]);
+    }
+
+    return [$X, $y];
+}
+
 public static function spiral_data($samples, $classes) {
     $X = [];
     $y = [];
@@ -1914,6 +2128,68 @@ public static function mandelbrotData($width, $height, $max_iterations = 1000) {
 
         return $result;
     }
+
+    public static function sign($x) {
+    if (is_array($x)) {
+        // If x is an array (or matrix), apply sign to each element
+        foreach ($x as &$element) {
+            $element = self::sign($element);
+        }
+        unset($element); // Break the reference with the last element
+        return $x;
+    } else {
+        // For single elements, determine the sign
+        return ($x > 0) ? 1 : -1;
+    }
+}
+
+
+public static function std($array, $axis = null) {
+    // Check if array is multidimensional and axis is not specified
+    if ($axis === null && count($array) !== count($array, COUNT_RECURSIVE)) {
+        // Flatten the array
+        $flattenedArray = [];
+        array_walk_recursive($array, function($a) use (&$flattenedArray) { 
+            $flattenedArray[] = $a; 
+        });
+        $array = $flattenedArray;
+    }
+
+    $mean = array_sum($array) / count($array);
+    $sumOfSquares = 0;
+
+    foreach ($array as $value) {
+        $sumOfSquares += ($value - $mean) ** 2;
+    }
+
+    $variance = $sumOfSquares / count($array);
+    return sqrt($variance);
+}
+
+public static function calculateAccuracy(array $predictions, array $y, $accuracy_precision) {
+    $total = 0;
+    $count = count($predictions);
+
+    for ($i = 0; $i < $count; $i++) {
+        for ($j = 0; $j < count($predictions[$i]); $j++) {
+            // Calculate the absolute difference for each element
+            $abs_diff = abs($predictions[$i][$j] - $y[$i][$j]);
+
+            // Check if this difference is less than the accuracy precision
+            if ($abs_diff < $accuracy_precision) {
+                $total++;
+            }
+        }
+    }
+
+    // Calculate and return the mean accuracy
+    return $total / ($count * count($predictions[0])); // Assuming all inner arrays have the same length
+}
+
+
+
+
+
 
 
 }

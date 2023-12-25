@@ -9,6 +9,9 @@ ini_set("precision", "16");
 
 class NumpyLightTest extends TestCase
 {
+
+    private $tolerance = 0.00001;
+
     public function testZeros1D()
     {
                 echo "\n TESTING....[testZeros1D]\n";
@@ -725,7 +728,7 @@ public function testJacobianMatrix() {
     foreach ($result as $i => $subArray) {
         foreach ($subArray as $j => $value) {
             // Using assertEquals with a delta for floating-point comparison
-            $this->assertTrue(abs($expected[$i][$j] - $value) < 0.00001);
+            $this->assertTrue(abs($expected[$i][$j] - $value) < $this->tolerance);
         }
     }
 }
@@ -736,7 +739,7 @@ public function testSqrt() {
     $expected1 = [1.0, 2.0, 3.0];
     $result1 = NumpyLight::sqrt($input1);
     foreach ($result1 as $i => $value) {
-        $this->assertEquals($expected1[$i], $value, '', $delta = 0.0001);
+        $this->assertEquals($expected1[$i], $value, '', $delta = $this->tolerance);
     }
 
     // For complex numbers, you'd need to decide how to handle them in PHP as PHP doesn't have built-in support for complex numbers.
@@ -748,7 +751,7 @@ public function testSqrt() {
         if (is_nan($expected2[$i])) {
             $this->assertTrue(is_nan($value));
         } else {
-            $this->assertEquals($expected2[$i], $value, '', $delta = 0.0001);
+            $this->assertEquals($expected2[$i], $value, '', $delta = $this->tolerance);
         }
     }
 }
@@ -989,7 +992,7 @@ foreach ($testCases as $testCase) {
     $result = NumpyLight::modifyOneHotEncoded($testCase['dinputs'], $testCase['y_true'], $testCase['valueToSubtract']);
     foreach ($result as $index => $row) {
         foreach ($row as $colIndex => $value) {
-            $this->assertEqualsWithDelta($testCase['expected'][$index][$colIndex], $value, 0.00001);
+            $this->assertEqualsWithDelta($testCase['expected'][$index][$colIndex], $value, $this->tolerance);
         }
     }
 }
@@ -1010,7 +1013,7 @@ public function testCalculate() {
         $y_true = [0, 2, 1];
         
         $loss = new Loss_CategoricalCrossentropy();
-        $result = $loss->calculate($output, $y_true);
+        $result = $loss->calculate($output, $y_true,false);
         
         $this->assertEquals(0.4594, round($result, 4));
     }
@@ -1035,7 +1038,7 @@ public function testForward()
             [0.33333333, 0.33333333, 0.33333333]
         ];
 
-        $this->assertEqualsWithDelta($expected_output, $output, 0.0001, "Forward pass does not match expected output");
+        $this->assertEqualsWithDelta($expected_output, $output, $this->tolerance, "Forward pass does not match expected output");
 
     }
 
@@ -1064,7 +1067,7 @@ public function testBackward()
 ];
 
 
-    $this->assertEqualsWithDelta($expected_dinputs, $dinputs, 0.0001, "Backward pass does not match expected output");
+    $this->assertEqualsWithDelta($expected_dinputs, $dinputs, $this->tolerance, "Backward pass does not match expected output");
 
 }
 
@@ -1088,11 +1091,11 @@ public function testActivation_Softmax_Loss_CategoricalCrossentropy_Forward()
         [0, 0, 1],
         [0, 1, 0]
     ];
-    $calculated_loss = $act_loss->forward($inputs, $y_true);
+    $calculated_loss = $act_loss->forward($inputs, $y_true,false);
 
     $expected_loss = 0.8222;  // The value we got from the Python code
 
-    $this->assertEqualsWithDelta($expected_loss, $calculated_loss, 0.0001,"Forward pass does not match expected output");
+    $this->assertEqualsWithDelta($expected_loss, $calculated_loss, $this->tolerance,"Forward pass does not match expected output");
 }
 
 public function testActivation_Softmax_Loss_CategoricalCrossentropy_Backward()
@@ -1126,7 +1129,7 @@ public function testActivation_Softmax_Loss_CategoricalCrossentropy_Backward()
         [0.02, -0.22, 0.02]
     ];  // The values we got from the Python code
 
-    $this->assertEqualsWithDelta($expected_dinputs, $calculated_dinputs, 0.0001,"Backward pass does not match expected output");
+    $this->assertEqualsWithDelta($expected_dinputs, $calculated_dinputs, $this->tolerance,"Backward pass does not match expected output");
 }
 
 public function testLossBinaryCrossentropyForwardAndBackward()
@@ -1165,7 +1168,7 @@ public function testLossBinaryCrossentropyForwardAndBackward()
 
     // Test forward pass
 
-    $this->assertEqualsWithDelta($expected_forward_output, $forward_output, 0.00001, "Forward pass does not match expected output");
+    $this->assertEqualsWithDelta($expected_forward_output, $forward_output, $this->tolerance, "Forward pass does not match expected output");
 
     // Assuming a gradient of 1 for the backward pass
     $dvalues = [
@@ -1190,7 +1193,7 @@ public function testLossBinaryCrossentropyForwardAndBackward()
     $backward_output = $loss_binary_crossentropy->dinputs;
 
     // Test backward pass
-    $this->assertEqualsWithDelta($expected_backward_output, $backward_output, 0.00001, "Backward pass does not match expected output");
+    $this->assertEqualsWithDelta($expected_backward_output, $backward_output, $this->tolerance, "Backward pass does not match expected output");
 }
 
 
@@ -1219,7 +1222,7 @@ public function testActivationSigmoidForwardAndBackward()
     $forward_output = $sigmoid->output;
 
     // Test forward pass
-    $this->assertEqualsWithDelta($expected_forward_output, $forward_output, 0.0001, "Forward pass does not match expected output");
+    $this->assertEqualsWithDelta($expected_forward_output, $forward_output, $this->tolerance, "Forward pass does not match expected output");
 
     // Assuming a gradient of 1 for the backward pass
     $dvalues = [[1, 1, 1], [1, 1, 1], [1, 1, 1]];
@@ -1236,9 +1239,8 @@ public function testActivationSigmoidForwardAndBackward()
     $backward_output = $sigmoid->dinputs;
 
     // Test backward pass
-    $this->assertEqualsWithDelta($expected_backward_output, $backward_output, 0.0001, "Backward pass does not match expected output");
+    $this->assertEqualsWithDelta($expected_backward_output, $backward_output, $this->tolerance, "Backward pass does not match expected output");
 }
-
 
 
 

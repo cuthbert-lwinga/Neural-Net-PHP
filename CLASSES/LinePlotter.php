@@ -73,6 +73,69 @@ public function plotLine($yValues, $colorName) {
     }
 }
 
+public function plotMultipleLinesWithYOnly($lines) {
+    foreach ($lines as $line) {
+        if (!isset($line['yValues'], $line['color'])) {
+            continue; // Skip if essential data is missing
+        }
+
+        $minY = min($line['yValues']);
+        $maxY = max($line['yValues']);
+        $normalizedYValues = array_map(function($y) use ($minY, $maxY) {
+            if ($maxY - $minY == 0) {
+                return ($this->height - 10) - ($this->height - 20) / 2;
+            } else {
+                return ($this->height - 10) - ($y - $minY) / ($maxY - $minY) * ($this->height - 20);
+            }
+        }, $line['yValues']);
+
+        $countY = count($line['yValues']);
+        // Handle the x-values independently for each line
+        if ($countY > 1) {
+            $step = ($this->width - 20) / ($countY - 1);
+        } else {
+            // If there is only one point, place it in the middle
+            $step = ($this->width - 20) / 2;
+        }
+
+        $xValues = array_map(function($index) use ($step) {
+            return 10 + $index * $step;
+        }, range(0, $countY - 1));
+
+        // Plot the line
+        $this->plotLineWithColor($xValues, $normalizedYValues, $line['color']);
+    }
+}
+
+
+public function plotLineWithColor($xValues, $yValues, $colorName) {
+    // Normalize the values first
+    $minX = min($xValues);
+    $maxX = max($xValues);
+    $minY = min($yValues);
+    $maxY = max($yValues);
+
+    $normalizedXValues = array_map(function($x) use ($minX, $maxX) {
+        return ($x - $minX) / ($maxX - $minX) * ($this->width - 20) + 10; // 10 padding from left and right
+    }, $xValues);
+
+    $normalizedYValues = array_map(function($y) use ($minY, $maxY) {
+        if ($maxY - $minY == 0) {
+            // If all y-values are the same, normalize to the middle of the plot
+            return ($this->height - 10) - ($this->height - 20) / 2;
+        } else {
+            return ($this->height - 10) - ($y - $minY) / ($maxY - $minY) * ($this->height - 20); // 10 padding from top and bottom
+        }
+    }, $yValues);
+
+    for ($i = 0; $i < count($normalizedXValues) - 1; $i++) {
+        imageline($this->image, $normalizedXValues[$i], $normalizedYValues[$i], 
+                  $normalizedXValues[$i + 1], $normalizedYValues[$i + 1], $this->colors[$colorName]);
+    }
+}
+
+
+
 
 public function plotPoints($points, $groups) {
     // Normalize the points first

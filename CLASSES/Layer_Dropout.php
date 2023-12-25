@@ -17,10 +17,16 @@ class Layer_Dropout {
         $this->rate = 1 - $rate;
     }
 
-    public function forward($inputs) {
+    public function forward($inputs,$training = true) {
         // Save input values
         $this->inputs = $inputs;
         
+        // If not in the training mode, return values
+        if (!$training) {
+            $this->output = $inputs; // Assuming $inputs is an array, no need to copy
+            return;
+        }
+
         // Generate and save scaled mask
         $inputsShape = np::shape($inputs);
         $this->binary_mask = np::divide(np::random()->binomial(1, $this->rate, $inputsShape), $this->rate);

@@ -23,11 +23,17 @@ public function forward($inputs  = NULL){
 
 
 public function backward($dvalues){
+    
     $this->dinputs = np::empty_like($dvalues);
     foreach ($this->output as $index => $single_output) {
         $single_dvalues = $dvalues[$index];
         $this->dinputs[$index] = np::jacobian_matrix($single_output, $single_dvalues);
     }
+}
+
+
+public function predictions($output){
+    return np::argmax($output);
 }
 
 
