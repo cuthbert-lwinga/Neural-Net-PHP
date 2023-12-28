@@ -25,6 +25,9 @@ include_once("Model.php");
 include_once("ArrayFileHandler.php");
 include_once("Queue.php");
 include_once("TaskRegistry.php");
+include_once("MatrixFileHandler.php");
 
 ArrayFileHandler::initialize();
+
+
 ?>

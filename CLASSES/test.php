@@ -93,11 +93,15 @@ for ($i=0; $i < $shapeA[0]; $i++) {
 
 $startTime = microtime(true); // Start time
 
-NumpyLight::dot($matrixA,$matrixB);
+// NumpyLight::dot($matrixA,$matrixB);
+
+ for ($i=0; $i < 10; $i++){
+    testingFunc($i, ($i*2));
+ }
 
 $endTime = microtime(true); // End time
 $executionTime = $endTime - $startTime; // Calculate execution time
-echo "Task dot with serialzed executed time $executionTime seconds.\n";
+echo "SINGLE-THREADED[$executionTime seconds]\n";
 
 
 // $startTime = microtime(true); // Start time
@@ -111,24 +115,45 @@ echo "Task dot with serialzed executed time $executionTime seconds.\n";
 
 
 function testingFunc($arg1, $arg2) {
-    echo "\n Output($arg1):: ".($arg1 * $arg2)."\n";
+    // $result = 1;
+
+    // // Example: Calculating factorial of $arg1
+    // for ($i = $arg1; $i > 1; $i--) {
+    //     $result *= $i;
+    // }
+
+    // // Additional operation using $arg2
+    // $result += $arg2;
+
+    sleep(1);
+    // echo "\n Output($arg1):: $result\n";
 }
 
-$ProcessManager = new ProcessManager(2);
+
+
+$ProcessManager = new ProcessManager(20);
 $b =4;
  $a = 2;
 
+$startTime = microtime(true); // Start time
+
  for ($i=0; $i < 10; $i++){
-    $taskKey = TaskRegistry::generateUniqueKey();
-    $ProcessManager->addTask(TaskRegistry::addTask($taskKey, 'testingFunc', [$i, ($i*2)]));
+    $ProcessManager->addTask('testingFunc', [$i, ($i*2)]);
  }
 
-// $ProcessManager->waitForAllProcesses();
 
-echo "\n DONE \n";
-sleep(30);
+$ProcessManager->waitForAllProcesses();
+
+
+$endTime = microtime(true); // End time
+$executionTime = $endTime - $startTime; // Calculate execution time
+echo "MULTI-THREADED[$executionTime seconds].\n";
+
+
+// echo "\n DONE \n";
+// sleep(20);
 echo "\n\n Starting shutdown \n\n";
-sleep(10);
+// sleep(10);
 $ProcessManager->killProcesses();
 echo "\n\n SHUTDOWN \n\n";
 

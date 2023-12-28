@@ -3,9 +3,13 @@ namespace NameSpaceNumpyLight;
 
 include_once("Headers.php");
 include_once("ProcessManager.php"); // important
+include_once("MatrixFileHandler.php"); // important
 use NameSpaceRandomGenerator\RandomGenerator;
 use ProcessManager\ProcessManager;
 use NameSpaceArrayFileHandler\ArrayFileHandler;
+use NameSpaceMatrixFileHandler\MatrixFileHandler;
+use NameSpaceNumpyLight\NumpyLight;
+
 use Exception;
 
 
@@ -221,10 +225,10 @@ public static function parallelDotProducttest($a, $b, $shapeA, $shapeB)
                 
                 $rowOuput = [];
 
-                for ($j=0; $j < $shapeB[1]; $j++) { 
-                    $column = NumpyLight::extractColumn($b,$j);
-                    $rowOuput[] = NumpyLight::dotProduct($row, $column);
-                }
+                // for ($j=0; $j < $shapeB[1]; $j++) { 
+                //     $column = NumpyLight::extractColumn($b,$j);
+                //     $rowOuput[] = NumpyLight::dotProduct($row, $column);
+                // }
                 
                 ArrayFileHandler::appendArray($rowOuput);
 
@@ -238,6 +242,67 @@ public static function parallelDotProducttest($a, $b, $shapeA, $shapeB)
      return [];//self::retrieveDataAsMatrix($tempFile);
 
 
+}
+//NameSpaceNumpyLight\\NumpyLight::shape
+public static function performMatrixDotProductAndStore($matrixA, $matrixB) {
+        
+
+        
+        $shapeA = self::shape($matrixA);
+        $shapeB = self::shape($matrixB);
+
+        // Check if the matrices can be dot-producted
+        if (end($shapeA) !== $shapeB[0]) {
+            throw new Exception("Shapes " . implode(",", $shapeA) . " and " . implode(",", $shapeB) . " not aligned.");
+        }
+
+        $uniqueFileName = MatrixFileHandler::init("MatrixDotProduct", $shapeA[0], $shapeB[1]);
+        
+        $ProcessManager = new ProcessManager(10);
+
+         $matrixB = serialize($matrixB);
+
+         var_dump($shapeA[0]);
+
+        // Perform dot product row by row
+        for ($i = 0; $i < $shapeA[0]; $i++) {
+            $rowIndex = $i;
+            $extractedRow = self::extractRow($matrixA, $rowIndex);
+            $extractedRow = serialize($extractedRow);
+            // self::performRowDotProductAndStore($rowIndex, $extractedRow, $matrixB, $uniqueFileName);
+            
+            $args = [$rowIndex, $extractedRow, $matrixB, $uniqueFileName];
+
+            $ProcessManager->addTask('NameSpaceNumpyLight\NumpyLight::performRowDotProductAndStore', $args);
+            // call_user_func_array('NameSpaceNumpyLight\NumpyLight::performRowDotProductAndStore', $args);
+
+        }
+
+        $ProcessManager->waitForAllProcesses();
+
+        $result = MatrixFileHandler::getMatrixAsArray($uniqueFileName);
+        // Destroy the matrix file when done
+        MatrixFileHandler::destroy($uniqueFileName);
+        $ProcessManager->killProcesses();
+
+        return $result;
+    }
+
+public static function performRowDotProductAndStore($rowIndex, $extractedRow, $rightMatrix, $outputFileName) {
+    // Assuming $rightMatrix is a 2D array
+    $extractedRow = unserialize($extractedRow);
+    $rightMatrix = unserialize($rightMatrix);
+    $shapeRightMatrix = self::shape($rightMatrix);
+    $rowData = [];
+
+    for ($colIndex = 0; $colIndex < $shapeRightMatrix[1]; $colIndex++) {
+        $column = self::extractColumn($rightMatrix, $colIndex);
+        $dotProductResult = self::dotProduct($extractedRow, $column);
+        $rowData[] = $dotProductResult; // Add the result to the rowData array
+    }
+    
+    // Update the entire row in the matrix file
+    MatrixFileHandler::updateRow($outputFileName, $rowIndex, $rowData);
 }
 
 
