@@ -7,7 +7,9 @@ class Activation_Linear {
     public $inputs;
     public $output;
     public $dinputs;
-
+    // for deprecation wanring
+    public $prev;
+    public $next;
     // Forward pass
     public function forward($inputs) {
         // Just remember values

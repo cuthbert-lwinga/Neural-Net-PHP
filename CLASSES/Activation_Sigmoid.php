@@ -11,7 +11,9 @@ class Activation_Sigmoid {
     public $inputs;
     public $output;
     public $dinputs;
-
+    // for deprecation wanring
+    public $prev;
+    public $next;
     public function forward($inputs) {
         // Save input and calculate/save output of the sigmoid function
         $this->inputs = $inputs;

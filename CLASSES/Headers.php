@@ -26,8 +26,8 @@ include_once("ArrayFileHandler.php");
 include_once("Queue.php");
 include_once("TaskRegistry.php");
 include_once("MatrixFileHandler.php");
-
-ArrayFileHandler::initialize();
+include_once("ImageProcessor.php");
+// ArrayFileHandler::initialize();
 
 
 ?>

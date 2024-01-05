@@ -21,6 +21,9 @@ class Layer_Dense{
     public $weight_regularizer_l2;
     public $bias_regularizer_l1;
     public $bias_regularizer_l2;
+    // for deprecation wanring
+    public $prev;
+    public $next;
 
     public function __construct($n_inputs, $n_neurons, 
                                 $weight_regularizer_l1 = 0, $weight_regularizer_l2 = 0,
@@ -32,6 +35,15 @@ class Layer_Dense{
         $this->weight_regularizer_l2 = $weight_regularizer_l2;
         $this->bias_regularizer_l1 = $bias_regularizer_l1;
         $this->bias_regularizer_l2 = $bias_regularizer_l2;
+    }
+
+    public function get_parameters(){
+        return [$this->weights, $this->biases];
+    }
+
+    public function set_parameters($weights,$biases){
+        $this->weights = $weights;
+        $this->biases = $biases;
     }
 
     public function forward($inputs){

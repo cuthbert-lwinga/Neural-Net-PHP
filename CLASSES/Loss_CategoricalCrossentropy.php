@@ -5,17 +5,18 @@ use NameSpaceNumpyLight\NumpyLight as np; // simulating numpy from python
 use NameSpaceRandomGenerator\RandomGenerator;
 
 class Loss {
- protected $trainable_layers;
-
-    
+    protected $trainable_layers = [];
+    public $accumulated_sum = 0;
+    public $accumulated_count = 0;
     // Method to remember trainable layers
-    public function rememberTrainableLayers($trainable_layers) {
+    public function remember_trainable_layers($trainable_layers) {
         $this->trainable_layers = $trainable_layers;
     }
 
-public function regularization_loss($layer) {
+public function regularization_loss() {
         $regularization_loss = 0;
-
+if (is_array($this->trainable_layers) || is_object($this->trainable_layers)){
+        foreach ($this->trainable_layers as $layer) {
         // L1 regularization - weights
         if ($layer->weight_regularizer_l1 > 0) {
             $regularization_loss += $layer->weight_regularizer_l1 * np::sum(np::abs($layer->weights));
@@ -35,6 +36,9 @@ public function regularization_loss($layer) {
         if ($layer->bias_regularizer_l2 > 0) {
             $regularization_loss += $layer->bias_regularizer_l2 * np::sum(np::multiply($layer->biases, $layer->biases));
         }
+    }
+
+    }
 
         return $regularization_loss;
     }
@@ -52,6 +56,9 @@ public function regularization_loss($layer) {
         $sample_losses = $this->forward($output, $y);
         $data_loss = np::mean($sample_losses);
 
+        $this->accumulated_sum += np::sum($sample_losses);
+        $this->accumulated_count += count($sample_losses);
+
 
         if (!$include_regularization) {
             return $data_loss;
@@ -60,15 +67,32 @@ public function regularization_loss($layer) {
         // Calculate regularization loss
         $regularization_loss = 0;
         if (is_array($this->trainable_layers) || is_object($this->trainable_layers)) {
-
-        foreach ($this->trainable_layers as $layer) {
-            $regularization_loss += $this->regularization_loss($layer);
-        }
-        
+            $regularization_loss = $this->regularization_loss();
         }
 
         return [$data_loss, $regularization_loss];
     }
+
+    public function new_pass(){
+        $this->accumulated_sum = 0;
+        $this->accumulated_count = 0;
+    }
+    
+
+    public function calculate_accumulated($include_regularization = false){
+        # Calculate mean loss
+        $data_loss = $this->accumulated_sum / $this->accumulated_count;
+        # If just data loss - return it
+        if(!$include_regularization)
+            return $data_loss;
+        # Return the data and regularization losses
+        $regularization_loss = $this->regularization_loss();
+        return [$data_loss, $regularization_loss]; // check this it need current layer 
+    }
+
+
+
+
 
 }
 

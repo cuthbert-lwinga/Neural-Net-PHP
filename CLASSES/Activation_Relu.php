@@ -11,6 +11,9 @@ class Activation_Relu{
 	public $inputs;
 	public $output;
     public $dinputs;
+    // for deprecation wanring
+    public $prev;
+    public $next;
 	function __construct($input=array()){
 		$this->inputs = $input;
 	}

@@ -9,7 +9,9 @@ class Activation_Softmax_Loss_CategoricalCrossentropy {
     public $loss;
     public $output;
     public $dinputs;
-
+    // for deprecation wanring
+    public $prev;
+    public $next;
     public function __construct() {
         $this->activation = new Activation_Softmax();
         $this->loss = new Loss_CategoricalCrossentropy();

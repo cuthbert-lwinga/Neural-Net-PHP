@@ -1,12 +1,9 @@
 <?php
 namespace NameSpaceThreads;
-include_once("Headers.php");
 include_once("SharedMemoryHandler.php");
-use NameSpaceQueue\Queue;
-use NameSpaceArrayFileHandler\ArrayFileHandler;
-use NameSpaceTaskRegistry\TaskRegistry;
 use NameSpaceSharedMemoryHandler\SharedMemoryHandler;
 use Exception;
+
 class Threads
 {
     private $maxProcesses;
@@ -22,31 +19,42 @@ class Threads
     public function __construct($maxProcesses = 1)
     {
         if (empty(self::$ExecutionQueue)) {
-           throw new \Exception("Nothing to execute, add functions to run on multi thread");
-           return;
-       }
-       $default_size = 1000000;
-       $this->maxProcesses = $maxProcesses;
-         $this->pid = SharedMemoryHandler::create('b', $default_size,$preserve_old = false);//preserve old just in case of zombie processes and should be cleared atfer init
-         $this->allocateExecutionQueue();
-         $this->maxProcesses = count(Threads::$ExecutionQueueAllocation);
-         $this->parentPid = getmypid();
-         $key = ftok(__FILE__, 'b');
-         $this->semId = sem_get($key);
-         $this->initProcesses();
+         throw new \Exception("Nothing to execute, add functions to run on multi thread.");
+         return;
      }
 
-    public static function run($threads = 2){
+     $this->parentPid = getmypid();
+     $pid = $this->parentPid;
+     $this->maxProcesses = $maxProcesses;
+     $this->allocateExecutionQueue();
+    //5000;
+     $default_size = $this->spaceForPidStorage();//$this->maxProcesses*strlen(serialize(["$pid"=>["idle"=>true,"process"=>NULL]]));
+     $this->pid = SharedMemoryHandler::create('c', $default_size,$preserve_old = false);//preserve old just in case of zombie processes and should be cleared atfer init
+     $this->killAllProcesses($deleteSharedMem = false);
+     $key = ftok(__FILE__, 'b');
+     $this->semId = sem_get($key);
+     $this->initProcesses();
+     
+     }
+
+     public static function run($threads = 2,$waitForoutput = true){
         $Threads = new Threads($threads);
-        $Threads->waitForAllProcessesToFinish();
-        Threads::$ExecutionQueueAllocation = [];
-        Threads::$ExecutionQueueAllocation = [];
-}
-     public function __destruct(){
-        // Delete and close the shared memory block
-     }
 
-     public function allocateExecutionQueue(){
+        if ($waitForoutput){
+            $Threads->waitForAllProcessesToFinish();
+            Threads::$ExecutionQueueAllocation = [];
+            Threads::$ExecutionQueueAllocation = [];
+        }else{
+            return $Threads;
+        }
+    }
+    public function __destruct(){
+        // Delete and close the shared memory block
+    }
+
+
+
+    public function allocateExecutionQueue(){
         $i = 0;
         $threads = $this->maxProcesses; // no upper bound
         
@@ -58,7 +66,7 @@ class Threads
             }
             $i++;
         }
-
+        $this->maxProcesses = count(Threads::$ExecutionQueueAllocation);
     }
 
     public static function generateunid(){
@@ -70,10 +78,22 @@ class Threads
         return $data;
     }
 
+    private function spaceForPidStorage(){
+        $B = [];
+        $pid = getmypid();
+        for ($i=0; $i < $this->maxProcesses; $i++){
+         $B[] = ["$pid"=>["idle"=>true,"process"=>NULL]];
+        }
+
+        $B = strlen(serialize($B));
+        return $B;
+    }
+
     private function enqueue($shmId,$data){
         $this->acquireLock();
         $mem = $this->memToArray($shmId);
         $mem[] = $data;
+        // echo "\nserialize ".strlen(serialize($mem))."\n";
         SharedMemoryHandler::write($shmId,serialize($mem));
         $this->releaseLock();
     }
@@ -84,6 +104,7 @@ class Threads
         if ($data == NULL) {
             return [];
         }
+        // var_dump($data);
         $data = unserialize($data);
         return $data;
     }
@@ -109,10 +130,12 @@ class Threads
     private function runningProcesses(){
         $processes = [];
         $mem = $this->memToArray($this->pid);        
-        for ($i=0; $i < count($mem); $i++){
-            foreach ($mem[$i] as $key=>$value) {
-                $processes[$key] = $value;
-            }
+        if ($mem){
+                for ($i=0; $i < count($mem); $i++){
+                    foreach ($mem[$i] as $key=>$value) {
+                        $processes[$key] = $value;
+                    }
+                }
         }
         return $processes;
     }
@@ -197,7 +220,8 @@ class Threads
                 $index = $this->processindex($pid);
                 continue;
             }
-
+            // echo "\n\nindex $index\n\n";
+            // var_dump(Threads::$ExecutionQueueAllocation);
             if (count(Threads::$ExecutionQueueAllocation[$index])<1){
                 posix_kill($pid, SIGTERM); // kill thread, tasks allocated finished
             break; // finished 
@@ -217,42 +241,71 @@ class Threads
 }
 
 
-public function killAllProcesses() {
+public function killAllProcesses($deleteSharedMem = true) {
         // only parent can
     if($this->parentPid == getmypid()){
         $processes = $this->runningProcesses();
         
         foreach ($processes as $pid => $value) {
-            
+
             if($this->isProcessRunning($pid)){
                         posix_kill($pid, SIGTERM); // kill signal
                     }
                 }
-                SharedMemoryHandler::delete($this->pid);
-                SharedMemoryHandler::close($this->pid);
+
+                SharedMemoryHandler::write($this->pid, "");
+                if ($deleteSharedMem) {
+                    SharedMemoryHandler::delete($this->pid);
+                    SharedMemoryHandler::close($this->pid);
+                }
 
             }
         }
+
+        private function uniqueShuffledKey() {
+    static $generated = [];  // Array to store previously generated strings
+
+    $alphabet = range('a', 'z');
+    do {
+        shuffle($alphabet);
+        $shuffled = implode('', $alphabet);
+    } while (in_array($shuffled, $generated));  // Regenerate if duplicate
+
+    $generated[] = $shuffled;  // Store the new unique string
+    return $shuffled;
+}
+
 
 
         public function waitForAllProcessesToFinish() {
         // only parent can
             if($this->parentPid == getmypid()){
                 $processes = $this->runningProcesses();
-                
-               
-
                 foreach ($processes as $pid => $value) {
                     while($this->isProcessRunning($pid)){
                         usleep(1000);
                     }
                 }
             }
-             $this->killAllProcesses();
+            $this->killAllProcesses($deleteSharedMem = true);
         }
 
-}
+        public function activeLiveThreads() {
+        // only parent can
+            if($this->parentPid == getmypid()){
+                $processes = $this->runningProcesses();
+                foreach ($processes as $pid => $value) {
+                    while($this->isProcessRunning($pid)){
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+
+    }
 
 
 
-?>
+    ?>

@@ -2,15 +2,19 @@
 namespace NameSpaceNumpyLight;
 
 include_once("Headers.php");
-include_once("ProcessManager.php"); // important
-include_once("MatrixFileHandler.php"); // important
+include_once("SharedMemoryHandler.php");
+include_once("Threads.php");
+include_once("MT_Maxtrix.php");
+use NameSpaceMT_Matrix\MT_Maxtrix;
 use NameSpaceRandomGenerator\RandomGenerator;
 use ProcessManager\ProcessManager;
 use NameSpaceArrayFileHandler\ArrayFileHandler;
-use NameSpaceMatrixFileHandler\MatrixFileHandler;
+// use NameSpaceMatrixFileHandler\MatrixFileHandler;
 use NameSpaceNumpyLight\NumpyLight;
-
 use Exception;
+use \RecursiveIteratorIterator;
+use NameSpaceThreads\Threads;
+use NameSpaceSocketServer\SocketServer;
 
 
 class NumpyLight{
@@ -28,7 +32,6 @@ class NumpyLight{
   public static function random($seed = null){
     return new RandomGenerator($seed);
 }
-
 
 
 private static function zerosArray($dimensions) {
@@ -125,12 +128,15 @@ public static function shape($array) {
         if (end($shapeA) !== $shapeB[0]) {
             throw new Exception("Shapes " . implode(",", $shapeA) . " and " . implode(",", $shapeB) . " not aligned.");
         }
+        $mt = new MT_Maxtrix();
 
         // if (function_exists('pcntl_fork')) {
         //     return self::parallelDotProduct($a, $b, $shapeA, $shapeB);
         // } else {
-            return self::sequentialDotProduct($a, $b, $shapeA, $shapeB);
+           return self::sequentialDotProduct($a, $b, $shapeA, $shapeB);
         //}
+
+        // return $mt->dot($a,$b,6); 
     }
 
 
@@ -307,22 +313,56 @@ public static function performRowDotProductAndStore($rowIndex, $extractedRow, $r
 
 
 
-    private static function sequentialDotProduct($a, $b, $shapeA, $shapeB)
-    {
-        $result = [];
-        for ($i = 0; $i < $shapeA[0]; $i++) {
-            $row = [];
-            for ($j = 0; $j < $shapeB[1]; $j++) {
-                $sum = 0;
-                for ($k = 0; $k < $shapeA[1]; $k++) {
-                    $sum += $a[$i][$k] * $b[$k][$j];
-                }
-                $row[] = $sum;
-            }
-            $result[] = $row;
-        }
-        return $result;
+    // private static function sequentialDotProduct($a, $b, $shapeA, $shapeB)
+    // {
+    //     $result = [];
+    //     for ($i = 0; $i < $shapeA[0]; $i++) {
+    //         $row = [];
+    //         for ($j = 0; $j < $shapeB[1]; $j++) {
+    //             $sum = 0;
+    //             for ($k = 0; $k < $shapeA[1]; $k++) {
+    //                 $sum += $a[$i][$k] * $b[$k][$j];
+    //             }
+    //             $row[] = $sum;
+    //         }
+    //         $result[] = $row;
+    //     }
+    //     return $result;
+    // }
+
+private static function sequentialDotProduct($a, $b, $shapeA, $shapeB) {
+    $result = [];
+    $rowsA = [];
+    $columnsB = [];
+
+    // Pre-extract and store rows of matrix a
+    for ($i = 0; $i < $shapeA[0]; $i++) {
+        $rowsA[$i] = self::extractRow($a, $i);
     }
+
+    // Pre-extract and store columns of matrix b
+    for ($j = 0; $j < $shapeB[1]; $j++) {
+        $columnsB[$j] = self::extractColumn($b, $j);
+    }
+
+    // Calculate dot products
+    for ($i = 0; $i < $shapeA[0]; $i++) {
+        $rowA = $rowsA[$i]; // Use the pre-extracted row of matrix a
+        $row = [];
+
+        for ($j = 0; $j < $shapeB[1]; $j++) {
+            $columnB = $columnsB[$j]; // Use the pre-extracted column of matrix b
+
+            // Use the dotProduct function for calculation
+            $row[] = self::dotProduct($rowA, $columnB);
+        }
+
+        $result[] = $row;
+    }
+
+    return $result;
+}
+
 
 
 // Function to append an array to a file
@@ -703,6 +743,70 @@ public static function flatten($array) {
     }
     return $result;
 }
+
+
+
+
+
+public static function asddfasdf($array, $axis = null, $keepdims = false) {
+    if ($axis === null) {
+        // Sum all elements
+        return self::sumAllElements($array, $keepdims);
+    } else {
+        // Sum along a specific axis
+        return self::sumSpecificAxis($array, $axis, $keepdims);
+    }
+}
+
+private static function sumAllElements($array, $keepdims) {
+    $sum = 0;
+    foreach (new \RecursiveIteratorIterator(new \RecursiveArrayIterator($array)) as $value) {
+        $sum += $value;
+    }
+
+    if ($keepdims) {
+        return [[$sum]]; // Adjust this according to the dimensions you want to keep
+    } else {
+        return $sum;
+    }
+}
+
+private static function sumSpecificAxis($array, $axis, $keepdims) {
+    if ($axis == 0) {
+        // Sum along rows
+        return self::sumAlongColumns($array, $keepdims);
+    } elseif ($axis == 1) {
+        // Sum along columns
+        return self::sumAlongRows($array, $keepdims);
+    } else {
+        // Handle other axes or throw an exception for unsupported axes
+        throw new Exception("Axis $axis not supported.");
+    }
+}
+
+private static function sumAlongColumns($array, $keepdims) {
+    $sums = array_fill(0, count($array[0]), 0);
+    foreach ($array as $row) {
+        foreach ($row as $index => $value) {
+            $sums[$index] += $value;
+        }
+    }
+    return $keepdims ? [$sums] : $sums;
+}
+
+private static function sumAlongRows($array, $keepdims) {
+    $sums = array_map(function($row) { 
+        return array_sum($row); 
+    }, $array);
+
+    if ($keepdims) {
+        return array_map(function($el) { return [$el]; }, $sums);
+    } else {
+        return $sums;
+    }
+}
+
+
 
 
 public static function sum($array, $axis=null, $keepdims=false) {
@@ -1657,39 +1761,94 @@ public static function diagflat($arr, $k = 0) {
 
 
 
+// public static function reshape($array, $shape) {
+//     // Flatten the array
+//     $flatArray = array();
+//     array_walk_recursive($array, function($a) use (&$flatArray) { $flatArray[] = $a; });
+
+//     // Handle special case of [-1, 1] shape
+//     if ($shape[0] == -1 && $shape[1] == 1) {
+//         return array_map(function($element) {
+//             return [$element];
+//         }, $flatArray);
+//     }
+
+//     // Calculate the total number of elements in the array
+//     $totalElements = array_product($shape);
+
+//     // Check if the total number of elements matches the array size
+//     if (count($flatArray) !== $totalElements) {
+//         throw new Exception('Total number of elements does not match the array size.');
+//     }
+
+//     $reshapedArray = array();
+//     $index = 0;
+
+//     for ($i = 0; $i < $shape[0]; $i++) {
+//         $row = array();
+//         for ($j = 0; $j < $shape[1]; $j++) {
+//             $row[] = $flatArray[$index];
+//             $index++;
+//         }
+//         $reshapedArray[] = $row;
+//     }
+//     return $reshapedArray;
+// }
+
 public static function reshape($array, $shape) {
+        // Calculate the inferred dimension if -1 is used
+        if (in_array(-1, $shape)) {
+            $specifiedDim = ($shape[0] == -1) ? $shape[1] : $shape[0];
+            $totalSize = self::countElements($array);
+
+            if ($totalSize % $specifiedDim !== 0) {
+                throw new Exception('Cannot infer the unspecified dimension.');
+            }
+
+            $inferredIndex = array_search(-1, $shape);
+            $shape[$inferredIndex] = $totalSize / $specifiedDim;
+        }
+
+        // Calculate the total number of elements in the new shape
+        $totalElements = array_product($shape);
+
+        // Check if the total number of elements matches the array size
+        if (self::countElements($array) !== $totalElements) {
+            throw new Exception('Total number of elements does not match the array size.');
+        }
+
+        return self::reshapeArray($array, $shape);
+    }
+
+    private static function countElements($array) {
+        $count = 0;
+        array_walk_recursive($array, function() use (&$count) { $count++; });
+        return $count;
+    }
+
+private static function reshapeArray($array, $shape) {
+    $reshapedArray = [];
+    $flatArray = [];
+
     // Flatten the array
-    $flatArray = array();
     array_walk_recursive($array, function($a) use (&$flatArray) { $flatArray[] = $a; });
 
-    // Handle special case of [-1, 1] shape
-    if ($shape[0] == -1 && $shape[1] == 1) {
-        return array_map(function($element) {
-            return [$element];
-        }, $flatArray);
-    }
-
-    // Calculate the total number of elements in the array
-    $totalElements = array_product($shape);
-
-    // Check if the total number of elements matches the array size
-    if (count($flatArray) !== $totalElements) {
-        throw new Exception('Total number of elements does not match the array size.');
-    }
-
-    $reshapedArray = array();
-    $index = 0;
-
+    $index = 0; // Index for the flattened array
     for ($i = 0; $i < $shape[0]; $i++) {
-        $row = array();
+        $row = [];
         for ($j = 0; $j < $shape[1]; $j++) {
-            $row[] = $flatArray[$index];
-            $index++;
+            if (isset($flatArray[$index])) {
+                $row[] = $flatArray[$index++];
+            } else {
+                throw new Exception('Array size mismatch.');
+            }
         }
         $reshapedArray[] = $row;
     }
+
     return $reshapedArray;
 }
+
 
 
 // public static function reshape($array, $shape) {
@@ -2249,6 +2408,37 @@ public static function calculateAccuracy(array $predictions, array $y, $accuracy
 
     // Calculate and return the mean accuracy
     return $total / ($count * count($predictions[0])); // Assuming all inner arrays have the same length
+}
+
+
+/**
+     * Rearranges the rows of a matrix based on a 1D array of indices.
+     *
+     * @param array $matrix The matrix to be rearranged.
+     * @param array $indices The array of indices dictating the new order.
+     * @return array The rearranged matrix.
+     */
+public static function rearrangeMatrix($matrix, $indices) {
+    $newMatrix = [];
+
+    // Check if the first element is an array - to determine if it's a matrix
+    $isMatrix = isset($matrix[0]) && is_array($matrix[0]);
+
+    foreach ($indices as $index) {
+        if (isset($matrix[$index])) {
+            if ($isMatrix) {
+                // For a matrix, add the whole sub-array
+                $newMatrix[] = $matrix[$index];
+            } else {
+                // For a single array, add just the element
+                $newMatrix[] = $matrix[$index];
+            }
+        } else {
+            echo "\nIndex not found $index\n";
+        }
+    }
+
+    return $newMatrix;
 }
 
 

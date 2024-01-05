@@ -27,13 +27,12 @@ $optimizer = new Optimizer_Adam();
 // var_dump($flattened_y);
 
 
-
 // Calculate accuracy precision
 $y_std = NumpyLight::std($y);
 $accuracy_precision = $y_std/250;
 
 // Training loop
-for ($epoch = 0; $epoch <= 100000; $epoch++) {
+for ($epoch = 0; $epoch <= 10000; $epoch++) {
     // Forward pass
     $dense1->forward($X);
     $activation1->forward($dense1->output);
@@ -61,21 +60,34 @@ for ($epoch = 0; $epoch <= 100000; $epoch++) {
     }
 
     // Backward pass
+    
     $loss_function->backward($activation3->output, $y);
+
+    
     $activation3->backward($loss_function->dinputs);
+    
+    
     $dense3->backward($activation3->dinputs);
+    
     $activation2->backward($dense3->dinputs);
+    $startTime = microtime(true); // Start time
     $dense2->backward($activation2->dinputs);
+    $endTime = microtime(true); // End time
+    $executionTime = $endTime - $startTime; // Calculate execution time
+    // echo "\n_________________________ time=> $executionTime seconds.\n";
     $activation1->backward($dense2->dinputs);
     $dense1->backward($activation1->dinputs);
 
-
+    // echo "\nhere\n";
     // Update weights and biases
+    
     $optimizer->pre_update_params();
     $optimizer->update_params($dense1);
     $optimizer->update_params($dense2);
     $optimizer->update_params($dense3);
     $optimizer->post_update_params();
+    
+
 }
 
 

@@ -10,6 +10,9 @@ class Layer_Dropout {
     public $binary_mask;
     public $output;
     public $dinputs;
+    // for deprecation wanring
+    public $prev;
+    public $next;
 
     public function __construct($rate) {
         // Store rate, we invert it as for example for dropout

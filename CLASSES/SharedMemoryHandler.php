@@ -70,7 +70,7 @@ class SharedMemoryHandler {
 
         $size = shmop_size($shmId);
         if (strlen($data)>=$size) {
-             throw new \Exception("memory overflow");
+             throw new \Exception("memory overflow ".strlen($data)."B being allocated to ".$size);
              return;
         }
 
@@ -83,10 +83,15 @@ class SharedMemoryHandler {
      * Delete a shared memory block.
      *
      * @param int $shmId The shared memory block identifier.
+     * @throws \Exception If unable to delete the shared memory block.
      */
-    public static function delete($shmId) {
-        shmop_delete($shmId);
-    }
+    
+        public static function delete($shmId) {
+            if (!shmop_delete($shmId)) {
+                throw new \Exception("Unable to delete shared memory block with ID: " . $shmId);
+            }
+        }
+
 
     /**
      * Close a shared memory block.
@@ -94,7 +99,7 @@ class SharedMemoryHandler {
      * @param int $shmId The shared memory block identifier.
      */
     public static function close($shmId) {
-        shmop_close($shmId);
+        // shmop_close($shmId);
     }
 
     /**
@@ -121,57 +126,13 @@ class SharedMemoryHandler {
         shmop_write($shmId, $clearData, 0);
     }
 
-    /**
- * Overwrite data in a shared memory block.
- *
- * @param int $shmId The shared memory block identifier.
- * @param string $data The data to write into the shared memory.
- */
-public static function overwrite($shmId, $data) {
-    // Get the size of the data to be written
-    $size = strlen($data);
-
-    // Get the size of the current shared memory segment
-    $shmSize = shmop_size($shmId);
-
-    // Check if the new data can fit into the existing shared memory segment
-    if ($size != $shmSize) {
-        // Delete the existing shared memory segment
-        shmop_delete($shmId);
-        shmop_close($shmId);
-
-        // Create a new shared memory segment with the appropriate size
-        $key = ftok(__FILE__, 'b'); // Replace 'b' with a suitable value
-        $shmId = shmop_open($key, "c", 0644, $size);
-        if (!$shmId) {
-            throw new \Exception("Unable to create shared memory segment.");
-        }
-    }
-
-    // Write the new data into the shared memory segment
-    shmop_write($shmId, $data, 0);
-
-    return $shmId;
 }
 
-
-}
-
-
-// $key = uniqid('task_', true);
-
-
-// echo $key."\n";
-
-
-// $key2 = uniqid('task_', true);
-
-
-// echo $key2."\n";
 
 // Create a shared memory block with a size of 100 bytes
-// $shmId = SharedMemoryHandler::create('b', 2);
-
+// $length = 8;
+// $uniqueHex = bin2hex(random_bytes($length / 2));
+// $shmId = SharedMemoryHandler::create($uniqueHex, 2);
 // // Write data to the shared memory block
 // // SharedMemoryHandler::write($shmId, "ab");
 // // SharedMemoryHandler::write($shmId, "ab");
@@ -185,9 +146,6 @@ public static function overwrite($shmId, $data) {
 // // Delete and close the shared memory block
 // SharedMemoryHandler::delete($shmId);
 // SharedMemoryHandler::close($shmId);
-
-
-
 
 
 

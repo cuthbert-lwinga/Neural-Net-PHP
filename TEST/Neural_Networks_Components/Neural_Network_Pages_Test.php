@@ -285,10 +285,10 @@ public function testComprehensiveNeuralNetworkFlow()
 
         // Dense1 Backward
 
-        // NumpyLight::addKeyValueToJson('check_these.json', 'dense1_dweights', $this->data['dense1_dweights']);
-        // NumpyLight::addKeyValueToJson('check_these.json', 'activation1_dinputs', $activation1->dinputs);
-        // NumpyLight::addKeyValueToJson('check_these.json', 'dense1_inputs', $dense1->inputs);
-        // NumpyLight::addKeyValueToJson('check_these.json', 'dense1_dweights_php', $dense1->dweights);
+        NumpyLight::addKeyValueToJson('check_these.json', 'dense1_dweights', $this->data['dense1_dweights']);
+        NumpyLight::addKeyValueToJson('check_these.json', 'activation1_dinputs', $activation1->dinputs);
+        NumpyLight::addKeyValueToJson('check_these.json', 'dense1_inputs', $dense1->inputs);
+        NumpyLight::addKeyValueToJson('check_these.json', 'dense1_dweights_php', $dense1->dweights);
 
 
         $this->assertEqualsWithDelta($this->data['dense1_inputs'], $dense1->inputs, $this->tolerance, "Output of Denseasdasdasda1 Backward (dweights) does not match expected output.");
@@ -298,11 +298,13 @@ public function testComprehensiveNeuralNetworkFlow()
         
         $this->assertEqualsWithDelta($this->data['dense1_dweights'], NumpyLight::dot(NumpyLight::transpose($dense1->inputs), $activation1->dinputs), $this->tolerance, "Output of Dense1 inputs does not match expected output.");
 
+        ///
 
-        // $dense1->backward($activation1->dinputs);
-        // $this->assertEqualsWithDelta($this->data['dense1_dweights'], $dense1->dweights, 0.0001, "Output of Dense1 Backward (dweights) does not match expected output.");
-        // $this->assertEqualsWithDelta($this->data['dense1_dbiases'], $dense1->dbiases, 0.0001, "Output of Dense1 Backward (dbiases) does not match expected output.");
-        // $this->assertEqualsWithDelta($this->data['dense1_dinputs'], $dense1->dinputs, 0.0001, "Output of Dense1 Backward (dinputs) does not match expected output.");
+
+        $dense1->backward($activation1->dinputs);
+        $this->assertEqualsWithDelta($this->data['dense1_dweights'], $dense1->dweights, 0.0001, "Output of Dense1 Backward (dweights) does not match expected output.");
+        $this->assertEqualsWithDelta($this->data['dense1_dbiases'], $dense1->dbiases, 0.0001, "Output of Dense1 Backward (dbiases) does not match expected output.");
+        $this->assertEqualsWithDelta($this->data['dense1_dinputs'], $dense1->dinputs, 0.0001, "Output of Dense1 Backward (dinputs) does not match expected output.");
 
         // Optimizer
         // $optimizer = new Optimizer_RMSprop();

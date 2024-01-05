@@ -66,6 +66,28 @@ public function binomial($n, $p, $shape_or_int) {
 }
 
 
+public function shuffle(&$array) {
+        if (!is_array($array) || empty($array)) {
+            return;
+        }
+
+        $isMultidimensional = is_array($array[0]);
+        if ($isMultidimensional) {
+            // Shuffle only the first level of the array
+            $keys = array_keys($array);
+            shuffle($keys);
+            $randomArray = [];
+            foreach ($keys as $key) {
+                $randomArray[$key] = $array[$key];
+            }
+            $array = $randomArray;
+        } else {
+            // Shuffle a one-dimensional array
+            shuffle($array);
+        }
+    }
+
+
 
 }
 

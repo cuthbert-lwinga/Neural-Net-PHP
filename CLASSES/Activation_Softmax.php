@@ -7,7 +7,9 @@ class Activation_Softmax {
     public $output;
     public $inputs;
     public $dinputs;
-    
+    // for deprecation wanring
+    public $prev;
+    public $next;
     function __construct($inputs=array()){
     	$this->inputs = $inputs;
     }

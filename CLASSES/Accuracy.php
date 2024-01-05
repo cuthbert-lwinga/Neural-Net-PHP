@@ -3,12 +3,32 @@ include_once("Headers.php");
 use NameSpaceNumpyLight\NumpyLight;
 
 abstract class Accuracy {
+
+    public $accumulated_sum = 0;
+    public $accumulated_count = 0;
+
     // Calculates an accuracy given predictions and ground truth values
     public function calculate($predictions, $y) {
         $comparisons = $this->compare($predictions, $y);
         $correct_predictions = count(array_filter($comparisons));
         $total_predictions = count($comparisons);
+
+        # Add accumulated sum of matching values and sample count
+        $this->accumulated_sum += NumpyLight::sum($comparisons);
+        $this->accumulated_count += count($comparisons);
+
         return $total_predictions > 0 ? $correct_predictions / $total_predictions : 0;
+    }
+
+    public function new_pass(){
+        $this->accumulated_sum = 0;
+        $this->accumulated_count = 0;
+    }
+    
+    public function calculate_accumulated(){
+        # Calculate mean loss
+        $data_loss = $this->accumulated_sum / $this->accumulated_count;
+        return $data_loss;
     }
 
     // Abstract method for comparing predictions with ground truth

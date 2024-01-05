@@ -1,6 +1,8 @@
 <?php
 use PHPUnit\Framework\TestCase;
 use NameSpaceNumpyLight\NumpyLight;
+use \RecursiveIteratorIterator;
+
 //ini_set('memory_limit', '256M');
 ini_set("precision", "16");
 
@@ -138,6 +140,7 @@ public function testPow()
     $result = NumPyLight::dot($a, $b);
     $expected = [[0, 0], [0, 0]];
 
+    
     $this->assertEquals($expected, $result);
 }
 

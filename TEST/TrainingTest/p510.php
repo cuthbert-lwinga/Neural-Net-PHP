@@ -15,10 +15,10 @@ $validation = NumpyLight::spiral_data(100,3);
 
 echo "\n\nModel Init\n\n";
 $Model = new Model();
-$Model->add(new Layer_Dense(2,10,$weight_regularizer_l2 = 5e-4 ,$bias_regularizer_l2 = 5e-4));
+$Model->add(new Layer_Dense(2,512,$weight_regularizer_l2 = 5e-4 ,$bias_regularizer_l2 = 5e-4));
 $Model->add(new Activation_Relu());
 $Model->add(new Layer_Dropout(0.0));
-$Model->add(new Layer_Dense(10,3));
+$Model->add(new Layer_Dense(512,3));
 $Model->add(new Activation_Softmax());
 $Model->set(
 	$loss_function = new Loss_CategoricalCrossentropy(),
@@ -28,6 +28,6 @@ $Model->set(
 
 $Model->finalize();
 
-$Model->train($X, $y,$epoch = 10000,$print_every = 100,$validation_data = $validation);
+$Model->train($X, $y,$epoch = 10000, $batch_size = NULL,$print_every = 100,$validation_data = $validation);
 
 ?>

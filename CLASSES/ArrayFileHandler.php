@@ -1,7 +1,5 @@
 <?PHP
 namespace NameSpaceArrayFileHandler;
-ini_set('memory_limit', '1024M'); // Increase to 1GB, for example
-
 use Exception;
 
 class ArrayFileHandler
