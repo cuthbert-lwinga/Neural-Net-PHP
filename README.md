@@ -16,7 +16,7 @@ Special acknowledgment and heartfelt gratitude go to Harrison Kinsley & Daniel K
 - [Usage 🚀](#usage-)
   - [Loading Data 📂](#loading-data-)
   - [Building the Model 🏗️](#building-the-model-)
-  - [Training 🏋️](#training-)
+  - [Training 🏋️](#training-your-neural-network-)
   - [Evaluating and Predicting 🔍](#evaluating-and-predicting-)
   - [Saving and Loading Models 💾](#saving-and-loading-models-)
 - [Components 🧩](#components-)
@@ -32,7 +32,6 @@ Special acknowledgment and heartfelt gratitude go to Harrison Kinsley & Daniel K
 - [Technical Considerations 🤔](#technical-considerations-)
 - [Acknowledgements 🙏🏿](#acknowledgements-)
 - [License 📝](#license-)
-
 
 
 ## Installation 🛠️
@@ -58,6 +57,88 @@ It's crucial to run tests after installation to ensure everything is set up corr
 
 You should see an output similar to the following, indicating all tests have passed successfully:
 ![Test Output](phpUnitTest.png)
+
+## Usage 🚀
+
+### Loading Data 📂
+To begin using Neural-Net-PHP, load your dataset. Here's an example using the Fashion-MNIST dataset:
+
+```php
+$mnist_data = create_data_mnist("fashion_mnist_images");
+list($X, $y, $X_test, $y_test) = $mnist_data;
+```
+
+### Building the Model 🏗️🧠
+
+Start crafting your neural network by layering the building blocks – neurons and synapses come to life with each line of code! Choose from a variety of activation functions, optimizers, and layers to create a network that fits your unique dataset. Here's a sample setup with a single hidden layer to kickstart your model architecture:
+
+```php
+echo "🚀 Initializing model...\n\n";
+$Model = new Model();
+
+// Input layer with as many neurons as features in your dataset
+$Model->add(new Layer_Dense(NumpyLight::shape($X)[1], 64));
+
+// Hidden layer using the ReLU activation function for non-linearity
+$Model->add(new Activation_Relu());
+
+// Output layer with softmax activation for probability distribution
+$Model->add(new Layer_Dense(64, 10)); // Assuming 10 classes for output
+$Model->add(new Activation_Softmax());
+
+echo "🧱 Model architecture is now built and ready for training!\n";
+
+```
+
+### Training Your Neural Network 🏋️💡
+
+Time to whip your model into shape! Just like a personal trainer sets a workout regimen, you'll set up a loss function to measure progress, an optimizer to improve with each iteration, and an accuracy metric to keep track of your gains. Once everything is in place, it's time to put your model to the test:
+
+```php
+echo "🔧 Configuring the neural workout...\n";
+$Model->set(
+    new Loss_CategoricalCrossentropy(),
+    new Optimizer_Adam(0.001, 1e-3),
+    new Accuracy_Categorical()
+);
+
+echo "🤖 Finalizing the model structure...\n";
+$Model->finalize();
+
+echo "🏃‍♂️ Ready, set, train! Let's push those computational limits...\n";
+$Model->train($X, $y, 200, 128, 100, [$X_test, $y_test]);
+
+
+```
+
+### Evaluating and Predicting 🔍📈
+
+After your model has been trained, it's time to see how well it performs! Evaluate its prowess on new data and unleash its predictive power:
+
+```php
+echo "🔍 Loading the trained model for evaluation...\n";
+$Model = Model::load('path/to/saved_model');
+
+echo "🤔 Making predictions on test data...\n";
+$confidences = $Model->predict($X_test);
+$predictions = $Model->output_layer_activation->predictions($confidences);
+
+echo "📊 Predictions ready! Time to analyze and interpret the results.\n";
+```
+
+### Saving and Loading Models 💾🔄
+
+Don't let your hard work go to waste! Save your finely-tuned model for future use, and reload it with ease whenever you need to make predictions or further improvements:
+
+```php
+echo "📦 Saving the trained model for future use...\n";
+$Model->save("path/to/be/saved");
+
+echo "🔄 Loading the saved model for continued brilliance...\n";
+$Model = Model::load('path/to/saved_model');
+
+echo "✅ Model saved and loaded successfully. Ready for more action!\n";
+```
 
 ## Components 🧩
 Neural-Net-PHP consists of several key components:

@@ -116,7 +116,6 @@ $Model->train($X, $y,$epoch = 200, $batch_size = 128,$print_every = 100,$validat
 
 
 $Model->save();
-
 // $ModelParameters = $Model->get_parameters();
 // echo "\n\nModel from Params\n\n";
 
