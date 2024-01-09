@@ -4,18 +4,11 @@ namespace NameSpaceNumpyLight;
 include_once("Headers.php");
 include_once("SharedMemoryHandler.php");
 include_once("Threads.php");
-include_once("MT_Maxtrix.php");
-use NameSpaceMT_Matrix\MT_Maxtrix;
+use NameSpaceThreads\Threads;
 use NameSpaceRandomGenerator\RandomGenerator;
-use ProcessManager\ProcessManager;
-use NameSpaceArrayFileHandler\ArrayFileHandler;
-// use NameSpaceMatrixFileHandler\MatrixFileHandler;
 use NameSpaceNumpyLight\NumpyLight;
 use Exception;
 use \RecursiveIteratorIterator;
-use NameSpaceThreads\Threads;
-use NameSpaceSocketServer\SocketServer;
-
 
 class NumpyLight{
 
@@ -122,22 +115,56 @@ public static function shape($array) {
 
  public static function dot($a, $b)
     {
+        // Threads::init();
         $shapeA = self::shape($a);
         $shapeB = self::shape($b);
 
         if (end($shapeA) !== $shapeB[0]) {
             throw new Exception("Shapes " . implode(",", $shapeA) . " and " . implode(",", $shapeB) . " not aligned.");
         }
-        $mt = new MT_Maxtrix();
-
+        $output = [];
         // if (function_exists('pcntl_fork')) {
         //     return self::parallelDotProduct($a, $b, $shapeA, $shapeB);
         // } else {
            return self::sequentialDotProduct($a, $b, $shapeA, $shapeB);
-        //}
+        // echo "\ncalled\n";
+        //     $dotproductOutput = (Threads::execute($a,$b,"dot"));
+        // //}
 
-        // return $mt->dot($a,$b,6); 
+        // // for ($i=0; $i < $shapeA[0]; $i++) {
+        // //     $output[] = self::nthRowDotProduct($a, $b, $i);
+        // // }
+        // // // return $mt->dot($a,$b,6);
+        // return $dotproductOutput; 
     }
+
+
+public static function nthRowDotProduct($leftMatrix, $rightMatrix, $nthRow) {
+    $shapeLeft = self::shape($leftMatrix);
+    $shapeRight = self::shape($rightMatrix);
+
+    if ($nthRow >= $shapeLeft[0]) {
+        throw new Exception("Row index out of bounds");
+    }
+
+    $resultRow = [];
+    $rowLeft = self::extractRow($leftMatrix, $nthRow); // Extract only the n-th row of the left matrix
+
+    // Pre-extract and store columns of right matrix
+    $columnsRight = [];
+    for ($j = 0; $j < $shapeRight[1]; $j++) {
+        $columnsRight[$j] = self::extractColumn($rightMatrix, $j);
+    }
+
+    // Calculate dot product for the n-th row
+    for ($j = 0; $j < $shapeRight[1]; $j++) {
+        $columnRight = $columnsRight[$j];
+        $resultRow[] = self::dotProduct($rowLeft, $columnRight);
+    }
+
+    return $resultRow;
+}
+
 
 
 
@@ -176,84 +203,11 @@ public static function dotProduct($array1, $array2) {
     return $sum;
 }
 
-private static function parallelDotProduct($a, $b, $shapeA, $shapeB)
-{
-    // $startTime = microtime(true); // Start time
-    $processManager = new ProcessManager();
-    $result = array_fill(0, $shapeA[0], array_fill(0, $shapeB[1], null));
-
-    $tempDir = sys_get_temp_dir();
-    $tempFiles = [];
-
-    for ($i = 0; $i < $shapeA[0]; $i++) {
-        $tempFile = tempnam($tempDir, 'dot_product_row_');
-        $tempFiles[$i] = $tempFile;
-
-        $processManager->run(function() use ($a, $b, $i, $shapeA, $shapeB, $tempFile) {
-            $rowResult = [];
-            for ($j = 0; $j < $shapeB[1]; $j++) {
-                $sum = 0;
-                for ($k = 0; $k < $shapeA[1]; $k++) {
-                    $sum += $a[$i][$k] * $b[$k][$j];
-                }
-                $rowResult[] = $sum;
-            }
-            file_put_contents($tempFile, serialize($rowResult));
-        });
-
-    }
-
- 
-    $processManager->waitForAllProcesses();
 
 
-    for ($i = 0; $i < $shapeA[0]; $i++) {
-        $rowResult = unserialize(file_get_contents($tempFiles[$i]));
-        $result[$i] = $rowResult;
-        unlink($tempFiles[$i]); // Delete the temporary file
-    }
-
-
-    return $result;
-}
-
-
-public static function parallelDotProducttest($a, $b, $shapeA, $shapeB)
-{
-    // $startTime = microtime(true); // Start time
-    $processManager = new ProcessManager();
-
-    for ($i=0; $i < $shapeA[0]; $i++) { 
-    
-        $row = NumpyLight::extractRow($a,0);
-
-        $processManager->run(function() use ($b, $row, $shapeB) {
-                
-                $rowOuput = [];
-
-                // for ($j=0; $j < $shapeB[1]; $j++) { 
-                //     $column = NumpyLight::extractColumn($b,$j);
-                //     $rowOuput[] = NumpyLight::dotProduct($row, $column);
-                // }
-                
-                ArrayFileHandler::appendArray($rowOuput);
-
-            });
-    }
-
-
- 
-    // $processManager->waitForAllProcesses();
-
-     return [];//self::retrieveDataAsMatrix($tempFile);
-
-
-}
 //NameSpaceNumpyLight\\NumpyLight::shape
 public static function performMatrixDotProductAndStore($matrixA, $matrixB) {
-        
 
-        
         $shapeA = self::shape($matrixA);
         $shapeB = self::shape($matrixB);
 
@@ -1280,92 +1234,6 @@ public static function add($matrix1, $matrix2)
 }
 
 
-// public static function add($matrix1, $matrix2)
-// {
-//     // Initialize result array
-//     $result = [];
-
-//     // Handle 1D arrays
-//     if (is_array($matrix1) && !is_array($matrix1[0]) && is_array($matrix2) && !is_array($matrix2[0])) {
-//         for ($i = 0; $i < count($matrix1); $i++) {
-//             $result[] = $matrix1[$i] + $matrix2[$i];
-//         }
-//         return $result;
-//     }
-
-//     if (is_int($matrix2) || is_float($matrix2)) {
-//         // If matrix2 is an integer or float, perform scalar addition
-//         foreach ($matrix1 as $i => $row) {
-//             if (is_array($row)) {
-//                 $resultRow = [];
-//                 foreach ($row as $j => $value) {
-//                     $resultRow[] = $value + $matrix2;
-//                 }
-//                 $result[] = $resultRow;
-//             } else {
-//                 $result[] = $row + $matrix2;
-//             }
-//         }
-//         return $result;
-//     }
-
-//     // Check for broadcasting scenarios
-//     $broadcastMatrix1 = is_array($matrix1) && count($matrix1) === 1;
-//     $broadcastMatrix2 = is_array($matrix2) && count($matrix2) === 1;
-
-//     $colCount = is_array($matrix1[0]) ? count($matrix1[0]) : 0;
-
-//     // Perform addition
-//     for ($i = 0; $i < max(count($matrix1), count($matrix2)); $i++) {
-//         $row = [];
-//         for ($j = 0; $j < $colCount; $j++) {
-//             $value1 = $broadcastMatrix1 ? $matrix1[0][$j] : $matrix1[$i][$j];
-//             $value2 = $broadcastMatrix2 ? $matrix2[0][$j] : $matrix2[$i][$j];
-//             $row[] = $value1 + $value2;
-//         }
-//         $result[] = $row;
-//     }
-
-//     return $result;
-// }
-
-
-
-
-// public static function subtract($matrix1, $matrix2)
-// {
-
-
-//     // Check if matrix shapes are compatible for 2D matrices
-//     if (count($matrix1[0]) > 1 && count($matrix2[0]) > 1) {
-//         if (count($matrix1) !== count($matrix2) || count($matrix1[0]) !== count($matrix2[0])) {
-//             throw new InvalidArgumentException('Matrix shapes are not compatible for subtraction.');
-//         }
-//     }
-//     // Check if matrix2 is a column vector
-//     elseif (count($matrix2[0]) === 1) {
-//         if (count($matrix1) !== count($matrix2)) {
-//             throw new InvalidArgumentException('Matrix shapes are not compatible for subtraction.');
-//         }
-//     }
-
-//     $result = [];
-
-//     // Perform the subtraction
-//     for ($i = 0; $i < count($matrix1); $i++) {
-//         $row = [];
-//         for ($j = 0; $j < count($matrix1[0]); $j++) {
-//             if (count($matrix2[0]) === 1) {  // If matrix2 is a column vector, broadcast the subtraction
-//                 $row[] = $matrix1[$i][$j] - $matrix2[$i][0];
-//             } else {  // Otherwise, perform element-wise subtraction
-//                 $row[] = $matrix1[$i][$j] - $matrix2[$i][$j];
-//             }
-//         }
-//         $result[] = $row;
-//     }
-
-//     return $result;
-// }
 
 public static function subtract($matrix1, $matrix2)
 {
@@ -1423,74 +1291,6 @@ public static function subtract($matrix1, $matrix2)
     return $result;
 }
 
-
-// public static function divide($array1, $array2) {
-
-//     // this may need revision
-//     // If array2 is a number, perform scalar division
-//     if (is_numeric($array2)) {
-//         return array_map(function($element) use ($array2) {
-//             if ($array2 == 0) {
-//                 throw new InvalidArgumentException('Division by zero is not allowed.');
-//             }
-//             if (is_array($element)) {
-//                 return self::divide($element, $array2);
-//             }
-//             return $element / $array2;
-//         }, $array1);
-//     }
-    
-//     $array1Shape = NumpyLight::shape($array1);
-//     $array2Shape = NumpyLight::shape($array2);
-
-// //echo json_encode($array1Shape)." ".json_encode($array2Shape)."<- \n";
-//     // Check if arrays have the same size
-//     if ($array1Shape==$array2Shape) {
-//         return self::elementWiseDivide($array1, $array2);
-//     }else{
-
-//             $len1 = count($array1Shape); // check len of shape 1
-//             $len2 = count($array2Shape); // check len of shape 2
-//             $array1Cols = ($len1==1)? $array1Shape[0]:$array1Shape[1]; // if single type then give it cols 1
-//             $array2Cols = ($len2==1)? $array2Shape[0]:$array2Shape[1]; // if single type then give it cols 1
-
-//         if (self::isBroadcastable($array1Shape, $array2Shape)) {
-//             // Identify the smaller array and expand its dimensions
-
-
-//             $temp = NumpyLight::isShape1Bigger($array1Shape,$array2Shape);
-
-//             if ($temp) {
-
-//                 if($array1Cols > $array2Cols){
-//                     $array2 = NumpyLight::expandDims($array2,NumpyLight::shape($array2),[count($array1),$array1Cols]);
-//                 }else{  
-//                     $array1 = NumpyLight::expandDims($array1,NumpyLight::shape($array1),[count($array1),$array2Cols]);
-//                     $array2 = NumpyLight::expandDims($array2,NumpyLight::shape($array2),[count($array1),$array2Cols]);
-//                 }
-
-//             }else{
-                    
-
-//                 if($array1Cols > $array2Cols){
-//                     $array1 = NumpyLight::expandDims($array1,NumpyLight::shape($array1),[count($array2),$array1Cols]);
-//                     $array2 = NumpyLight::expandDims($array2,NumpyLight::shape($array2),[count($array2),$array1Cols]);
-//                 }else{  
-//                     $array1 = NumpyLight::expandDims($array1,NumpyLight::shape($array1),[count($array2),$array2Cols]);
-//                 }
-//             }
-
-
-//             return self::elementWiseDivide($array1, $array2);
-//     } else {
-//         throw new Exception("Arrays are not broadcast-compatible.");
-//     }
-
-// throw new InvalidArgumentException('Arrays must have the same size for division.');
-// }
-
-
-// }
 
 public static function divide($array1, $array2) {
 
@@ -1576,19 +1376,6 @@ public static function elementWiseDivide($array1, $array2) {
 }
 
 
-// if (self::isBroadcastable($array1Shape, $array2Shape)) {
-//             // Identify the smaller array and expand its dimensions
-//             if (self::isShape1Bigger($array1Shape, $array2Shape)) {
-//                 $array2 = self::expandDims($array2, $array2Shape, $array1Shape);
-//             } else {
-//                 $array1 = self::expandDims($array1, $array1Shape, $array2Shape);
-//             }
-
-//             return self::elementWiseMax($array1, $array2);
-//         } else {
-//             throw new Exception("Arrays are not broadcast-compatible.");
-//         }
-
 public static function transpose($array) {
     $transposed = [];
     foreach ($array as $rowKey => $row) {
@@ -1620,36 +1407,6 @@ public static function addKeyValueToJson($filePath, $key, $value) {
     file_put_contents($filePath, json_encode($jsonData, JSON_PRETTY_PRINT));
 }
 
-// public static function multiply($array1, $array2) {
-//     // If array2 is a number, perform scalar multiplication
-//     if (is_numeric($array2)) {
-//         return array_map(function($element) use ($array2) {
-//             if (is_array($element)) {
-//                 return self::multiply($element, $array2);
-//             }
-//             return $element * $array2;
-//         }, $array1);
-//     }
-    
-//     // Check if arrays have the same size
-//     if (count($array1) !== count($array2)) {
-//         return "Error: Arrays must have the same size.";
-//     }
-
-//     // Perform element-wise multiplication
-//     $result = [];
-//     for ($i = 0; $i < count($array1); $i++) {
-//         if (is_array($array1[$i]) && is_array($array2[$i])) {
-//             $result[] = self::multiply($array1[$i], $array2[$i]);
-//         } elseif (!is_array($array1[$i]) && !is_array($array2[$i])) {
-//             $result[] = $array1[$i] * $array2[$i];
-//         } else {
-//             return "Error: Mismatch in dimensions.";
-//         }
-//     }
-
-//     return $result;
-// }
 
 public static function multiply($array1, $array2) {
 
@@ -1760,41 +1517,6 @@ public static function diagflat($arr, $k = 0) {
 }
 
 
-
-// public static function reshape($array, $shape) {
-//     // Flatten the array
-//     $flatArray = array();
-//     array_walk_recursive($array, function($a) use (&$flatArray) { $flatArray[] = $a; });
-
-//     // Handle special case of [-1, 1] shape
-//     if ($shape[0] == -1 && $shape[1] == 1) {
-//         return array_map(function($element) {
-//             return [$element];
-//         }, $flatArray);
-//     }
-
-//     // Calculate the total number of elements in the array
-//     $totalElements = array_product($shape);
-
-//     // Check if the total number of elements matches the array size
-//     if (count($flatArray) !== $totalElements) {
-//         throw new Exception('Total number of elements does not match the array size.');
-//     }
-
-//     $reshapedArray = array();
-//     $index = 0;
-
-//     for ($i = 0; $i < $shape[0]; $i++) {
-//         $row = array();
-//         for ($j = 0; $j < $shape[1]; $j++) {
-//             $row[] = $flatArray[$index];
-//             $index++;
-//         }
-//         $reshapedArray[] = $row;
-//     }
-//     return $reshapedArray;
-// }
-
 public static function reshape($array, $shape) {
         // Calculate the inferred dimension if -1 is used
         if (in_array(-1, $shape)) {
@@ -1850,33 +1572,6 @@ private static function reshapeArray($array, $shape) {
 }
 
 
-
-// public static function reshape($array, $shape) {
-//     // Flatten the array
-//     $flatArray = array();
-//     array_walk_recursive($array, function($a) use (&$flatArray) { $flatArray[] = $a; });
-
-//     // Calculate the total number of elements in the array
-//     $totalElements = array_product($shape);
-
-//     // Check if the total number of elements matches the array size
-//     if (count($flatArray) !== $totalElements) {
-//         throw new Exception('Total number of elements does not match the array size.');
-//     }
-
-//     $reshapedArray = array();
-//     $index = 0;
-
-//     for ($i = 0; $i < $shape[0]; $i++) {
-//         $row = array();
-//         for ($j = 0; $j < $shape[1]; $j++) {
-//             $row[] = $flatArray[$index];
-//             $index++;
-//         }
-//         $reshapedArray[] = $row;
-//     }
-//     return $reshapedArray;
-// }
 
 
 public static function jacobian_matrix($output, $dvalues) {
@@ -2234,22 +1929,6 @@ public static function sliceMatrix($matrix, $maxRows = 5) {
 }
 
 
-// public static function apply_relu_backwards($inputs, $dinputs,$limit = 0,$newvalue = 0,$strict = true) {
-//     foreach ($inputs as $key => $value) {
-//         if ($strict){
-//                 if ($value <= $limit) {
-//                     $dinputs[$key] = $newvalue;
-//                 }
-//             }else{
-//                 if ($value < $limit) {
-//                     $dinputs[$key] = $newvalue;
-//                 }
-//             }
-//     }
-//     return $dinputs;
-// }
-
-
 public static function apply_relu_backwards($inputs, $dinputs, $limit = 0, $newvalue = 0, $strict = true) {
     // Check if the shapes of $inputs and $dinputs are the same
     if (self::shape($inputs) != self::shape($dinputs)) {
@@ -2440,11 +2119,6 @@ public static function rearrangeMatrix($matrix, $indices) {
 
     return $newMatrix;
 }
-
-
-
-
-
 
 
 }

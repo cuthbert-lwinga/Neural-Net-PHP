@@ -8,6 +8,7 @@ $baseDir = dirname($vendorDir);
 return array(
     'Symfony\\Polyfill\\Mbstring\\' => array($vendorDir . '/symfony/polyfill-mbstring'),
     'PhpParser\\' => array($vendorDir . '/nikic/php-parser/lib/PhpParser'),
+    'NameSpaceThreads\\' => array($baseDir . '/CLASSES'),
     'NameSpaceRandomGenerator\\' => array($baseDir . '/CLASSES'),
     'NameSpaceNumpyLight\\' => array($baseDir . '/CLASSES'),
     'Doctrine\\Instantiator\\' => array($vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator'),

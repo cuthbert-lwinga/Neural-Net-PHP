@@ -77,7 +77,7 @@ $validation = [$X_test, $y_test];
 echo "\n\nModel Init\n\n";
 
 
-$Model = Model::load('saved_model');
+$Model = Model::load('fashion_mnist_model');
 
 
 // $Model->evaluate($X_test, $y_test);

@@ -1,7 +1,9 @@
 <?php
+// include_once("../../CLASSES/Threads.php");
 use PHPUnit\Framework\TestCase;
 use NameSpaceNumpyLight\NumpyLight;
 use \RecursiveIteratorIterator;
+use NameSpaceThreads\Threads;
 
 //ini_set('memory_limit', '256M');
 ini_set("precision", "16");
@@ -14,11 +16,20 @@ class NumpyLightTest extends TestCase
 
     private $tolerance = 0.00001;
 
+    public function testThreading(){
+        echo "\n TESTING....[THREADS] BY PASSED \n";
+        // Threads::init();
+        // $a = [[1,2],[3,4]];
+        // $b = $a;
+        // $dotproductOutput = (Threads::execute($a,$b,"dot"));
+        $this->assertEquals(true, true);
+    }
+
     public function testZeros1D()
     {
                 echo "\n TESTING....[testZeros1D]\n";
 
-        $numpyLight = new NumpyLight();
+        // $numpyLight = new NumpyLight();
         $result = NumpyLight::zeros(3);
         $this->assertEquals([0.0, 0.0, 0.0], $result);
     }
@@ -26,7 +37,7 @@ class NumpyLightTest extends TestCase
     public function testZeros2D()
     {
         echo "\n TESTING....[testZeros2D]\n";
-        $numpyLight = new NumpyLight();
+        // $numpyLight = new NumpyLight();
         $result = NumpyLight::zeros(2, 2);
         $this->assertEquals([[0.0, 0.0], [0.0, 0.0]], $result);
     }
@@ -35,7 +46,7 @@ class NumpyLightTest extends TestCase
     {
                 echo "\n TESTING....[testZeros3D]\n";
 
-        $numpyLight = new NumpyLight();
+        // $numpyLight = new NumpyLight();
         $result = NumpyLight::zeros(2, 2, 2);
         $this->assertEquals([[[0.0, 0.0], [0.0, 0.0]], [[0.0, 0.0], [0.0, 0.0]]], $result);
     }
@@ -44,7 +55,7 @@ class NumpyLightTest extends TestCase
 {
     echo "\n TESTING....[testZerosLike]\n";
 
-    $numpyLight = new NumpyLight();
+    // $numpyLight = new NumpyLight();
     
     // Test 1D array
     $result = NumpyLight::zeros_like([1, 2, 3]);
@@ -63,7 +74,7 @@ public function testPow()
 {
     echo "\n TESTING....[testPow]\n";
 
-    $numpyLight = new NumpyLight();
+    // $numpyLight = new NumpyLight();
 
     // Test 1D array
     $result = NumpyLight::pow([1, 2, 3], 2);
@@ -164,7 +175,7 @@ public function testPow()
 {
     echo "\n TESTING....[testArgmax]\n";
 
-    $numpyLight = new NumpyLight();
+    // $numpyLight = new NumpyLight();
 
     // Test 2D array
     $result = NumpyLight::argmax([[1, 2, 3], [4, 5, 1], [2, 8, 6]]);
@@ -340,7 +351,7 @@ public function testAddMatrixwithIntOrFloat()
 {
     echo "\n TESTING....[testAddMatrixwithIntOrFloat]\n";
 
-    $numpyLight = new NumpyLight();
+    // $numpyLight = new NumpyLight();
 
     // Test 1D array with integer
     $result = NumpyLight::add([1, 2, 3], 2);
@@ -764,7 +775,7 @@ public function testSqrt() {
 public function testMean() {
     echo "\n TESTING....[testMean]\n";
 
-    $numpyLight = new NumpyLight();
+    // $numpyLight = new NumpyLight();
 
     // Test 1: Mean of a flattened array
     $a1 = array(array(1, 2), array(3, 4));

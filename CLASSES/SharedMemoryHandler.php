@@ -83,15 +83,10 @@ class SharedMemoryHandler {
      * Delete a shared memory block.
      *
      * @param int $shmId The shared memory block identifier.
-     * @throws \Exception If unable to delete the shared memory block.
      */
-    
-        public static function delete($shmId) {
-            if (!shmop_delete($shmId)) {
-                throw new \Exception("Unable to delete shared memory block with ID: " . $shmId);
-            }
-        }
-
+    public static function delete($shmId) {
+        shmop_delete($shmId);
+    }
 
     /**
      * Close a shared memory block.
@@ -99,7 +94,7 @@ class SharedMemoryHandler {
      * @param int $shmId The shared memory block identifier.
      */
     public static function close($shmId) {
-        // shmop_close($shmId);
+        shmop_close($shmId);
     }
 
     /**

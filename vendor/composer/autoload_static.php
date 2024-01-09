@@ -23,6 +23,7 @@ class ComposerStaticInit245e148464d627ac49825a924f477cc5
         ),
         'N' => 
         array (
+            'NameSpaceThreads\\' => 17,
             'NameSpaceRandomGenerator\\' => 25,
             'NameSpaceNumpyLight\\' => 20,
         ),
@@ -41,6 +42,10 @@ class ComposerStaticInit245e148464d627ac49825a924f477cc5
         'PhpParser\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
+        ),
+        'NameSpaceThreads\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/CLASSES',
         ),
         'NameSpaceRandomGenerator\\' => 
         array (

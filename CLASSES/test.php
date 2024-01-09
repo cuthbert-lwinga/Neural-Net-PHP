@@ -1,58 +1,90 @@
 <?php
-include_once("Headers.php");
+// ini_set('memory_limit', '20480M'); // Increase the memory limit to 20480MB (20GB)
+include_once("SharedMemoryHandler.php");
+include_once("Threads.php");
+include_once("MT_Maxtrix.php");
+include_once("NumpyLight.php");
+include_once("SharedFile.php");
+use NameSpaceSharedFile\SharedFile;
+use NameSpaceMT_Matrix\MT_Maxtrix;
 use NameSpaceNumpyLight\NumpyLight;
-use NameSpaceRandomGenerator\RandomGenerator;
-use NameSpaceActivationSigmoid\Activation_Sigmoid;
-use ProcessManager\ProcessManager;
-use NameSpaceArrayFileHandler\ArrayFileHandler;
-use NameSpaceQueue\Queue;
-use NameSpaceTaskRegistry\TaskRegistry;
-// Load matrices from JSON file
-// $jsonData = file_get_contents('combined_matrices.json');
-// $matrices = json_decode($jsonData, true);
+use NameSpaceThreads\Threads;
 
-// $matrixA = $matrices['matrixA'];
-// $matrixB = $matrices['matrixB'];
+function generateRandomMatrix($rows, $cols, $min = 0.0, $max = 1.0) {
+    $matrix = [];
 
-// // Perform the dot product
-// $startTime = microtime(true); // Start time
-// $result = NumpyLight::dot($matrixA, $matrixB);
-//  $endTime = microtime(true); // End time
-//             $executionTime = $endTime - $startTime; // Calculate execution time
-//             echo "Task dot executed time $executionTime seconds.\n";
-// var_dump($result);
-// $Activation_Sigmoid->forward($temp);
+    for ($i = 0; $i < $rows; $i++) {
+        $row = [];
+        for ($j = 0; $j < $cols; $j++) {
+            $row[] = $min + mt_rand() / mt_getrandmax() * ($max - $min);
+        }
+        $matrix[] = $row;
+    }
 
-// $Activation_Sigmoid->backward($temp);
+    return $matrix;
+}
 
-// NumpyLight::displayMatrix($Activation_Sigmoid->dinputs);
+Threads::init();
+// Threads::init();
+// Example usage:0.14973092079163 seconds.
+$rows = 200; // Number of rows
+$cols = 28*28; // Number of columns
+$min = 0.1; // Minimum float value
+$max = 0.8; // Maximum float value
+echo "starting\n";
 
-// NumpyLight::displayMatrix($Activation_Sigmoid->dinputs);
+$jsonData = [];
 
-// $inf = (NumpyLight::log([0,0,0,0]));
+$matrixA = generateRandomMatrix($rows, $cols, $min = 0.1, $max = 0.2);
+$matrixB = generateRandomMatrix($rows=28*28, $cols=200, $min = 0.1, $max = 0.2);//generateRandomMatrix($rows, $cols, $min = 0.1, $max = 0.2) ;
 
-// // var_dump(NumpyLight::clip($inf, 1e-7, 1 - 1e-7));
+// $jsonData["matrixA"] = $matrixA;
+// $jsonData["matrixB"] = $matrixA;
+// $jsonData["output"] = $dotproductOutput;
+
+// $filePath = 'test.json';
+
+// // Save JSON data to the file
+// file_put_contents($filePath, json_encode($jsonData));
+// $Threads = new Threads();
+
+// $mt = new MT_Maxtrix();
 
 
-// var_dump(NumpyLight::reshape([0,0,0,0,0,0],[-1,1]));
+    $startTime = microtime(true); // Start time 3.8503890037537 seconds.
+
+    $dotproductOutput = (Threads::execute($matrixA,$matrixB,"dot"));
+    $endTime = microtime(true); // End time
+    $executionTime = $endTime - $startTime; // Calculate execution time
+    echo "Task dot with threading operation with caller function test executed time $executionTime seconds.\n";
 
 
-// $matrixA = generateRandomMatrix($rows=300, $cols=1000, $min = 0.1, $max = 0.2) ;
-// $matrixB = generateRandomMatrix($rows=1000, $cols=1000, $min = 0.1, $max = 0.2) ;
-// $startTime = microtime(true); // Start time
 
-$matrixA = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];  // 3x3 matrix
-$matrixB = [[10, 11], [12, 13], [14, 15]];  // 3x2 matrix
-var_dump(NumpyLight::dot($matrixA,$matrixB));
+
+$startTime = microtime(true); // Start time 3.8503890037537 seconds.
+
+(NumpyLight::dot($matrixA,$matrixB));
+
+$endTime = microtime(true); // End time
+$executionTime = $endTime - $startTime; // Calculate execution time
+echo "Task dot with threading operation with caller function test executed time $executionTime seconds.\n";
+
+
+
+// echo "\nDONE\n";
+
 // echo "\n+++++++++++++++++++++++++++++++++++++++++++++\n";
 
 // $matrixA = [[0, 0], [0, 0]];
 // $matrixB = [[4, 3], [2, 1]];
-// var_dump(NumpyLight::dot($matrixA,$matrixB));
+// $mt = new MT_Maxtrix();
+// $startTime = microtime(true); // Start time 3.8503890037537 seconds.
+
+// var_dump($mt->dot($matrixA,$matrixB,6));
 
 // $endTime = microtime(true); // End time
 // $executionTime = $endTime - $startTime; // Calculate execution time
-// echo "SINGLE-THREADED[$executionTime seconds]\n";
+// echo "Task dot with threading operation with caller function test executed time $executionTime seconds.\n";
 
 
 ?>
