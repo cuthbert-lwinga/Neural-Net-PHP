@@ -42,7 +42,7 @@ for ($epoch = 0; $epoch <= 10000; $epoch++) {
 	$dropout1->forward($activation1->output);
 	$dense2->forward($dropout1->output);
 	
-	$data_loss = $loss_activation->forward($dense2->output, $y)[0];
+	$data_loss = $loss_activation->forward($dense2->output, $y,false);
 	$regularization_loss = $loss_activation->loss->regularization_loss($dense1)+$loss_activation->loss->regularization_loss($dense2);
 
 	# Calculate overall loss

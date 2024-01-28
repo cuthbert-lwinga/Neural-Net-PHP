@@ -6,7 +6,10 @@ class ImageProcessor
 
     // Constructor
     public function __construct($imagePath) {
-        $this->loadImage($imagePath);
+        if (!empty($imagePath)) {
+           $this->loadImage($imagePath);
+        }
+        
         return $this;
     }
 

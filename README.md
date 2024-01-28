@@ -19,6 +19,7 @@ Special acknowledgment and heartfelt gratitude go to Harrison Kinsley & Daniel K
   - [Training 🏋️](#training-your-neural-network-)
   - [Evaluating and Predicting 🔍](#evaluating-and-predicting-)
   - [Saving and Loading Models 💾](#saving-and-loading-models-)
+- [Performance Enhancement with C++ Integration 🚀🔧](#performance-enhancement-with-c-integration-)
 - [Components 🧩](#components-)
   - [Activation Functions 🔥](#activation-functions-)
   - [Optimizers ⚙️](#optimizers-)
@@ -139,6 +140,36 @@ $Model = Model::load('path/to/saved_model');
 
 echo "✅ Model saved and loaded successfully. Ready for more action!\n";
 ```
+
+## Performance Enhancement with C++ Integration 🚀🔧
+
+### Major Update: Threading with C++
+
+I'm thrilled to share a significant performance enhancement that I've brought to Neural-Net-PHP: by integrating C++ and enabling threading, I've managed to significantly boost computation speeds. The latest benchmarks show that threading has dramatically decreased the time it takes to perform matrix dot product operations, which is a game changer for processing efficiency in neural network computations.
+
+### Setting Up for Optimal Performance
+
+To take advantage of this speed, you'll need to follow these steps:
+
+1. Navigate to the main Neural-Net-PHP directory.
+2. Run the `make` command.
+
+This setup primes your system to utilize the C++ integration for optimized performance.
+
+### System Requirements:
+
+- Make sure `g++` is installed on your system. It's essential for the C++ performance enhancements to function properly.
+
+### The Proof Is in the Performance:
+
+Below is a chart depicting the impressive reduction in dot product computation times with threading enabled (blue line) compared to the times without threading (red line):
+
+![Dot Product Time vs. Matrix Size Chart](perfomance-test-chart.png)
+
+As the matrix size grows, the impact of threading becomes increasingly evident. This advancement substantially elevates PHP's standing as a competent language for AI and machine learning tasks that demand intensive computation.
+
+I am committed to furthering the development of Neural-Net-PHP, pushing PHP to its limits in the AI domain. Keep an eye out for more updates!
+
 
 ## Components 🧩
 Neural-Net-PHP consists of several key components:

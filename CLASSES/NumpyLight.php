@@ -4,6 +4,7 @@ namespace NameSpaceNumpyLight;
 include_once("Headers.php");
 include_once("SharedMemoryHandler.php");
 include_once("Threads.php");
+include_once("SystemOperations.php");
 use NameSpaceThreads\Threads;
 use NameSpaceRandomGenerator\RandomGenerator;
 use NameSpaceNumpyLight\NumpyLight;
@@ -21,6 +22,8 @@ class NumpyLight{
   // bellow you will find different matrix operations, I MADE THEM EQUIVALENT TO NUMPY  
 
   //echo PHP_FLOAT_MAX;
+
+    private static $counter = 1; // Declare a static counter
 
   public static function random($seed = null){
     return new RandomGenerator($seed);
@@ -122,21 +125,75 @@ public static function shape($array) {
         if (end($shapeA) !== $shapeB[0]) {
             throw new Exception("Shapes " . implode(",", $shapeA) . " and " . implode(",", $shapeB) . " not aligned.");
         }
-        $output = [];
-        // if (function_exists('pcntl_fork')) {
-        //     return self::parallelDotProduct($a, $b, $shapeA, $shapeB);
-        // } else {
-           return self::sequentialDotProduct($a, $b, $shapeA, $shapeB);
-        // echo "\ncalled\n";
-        //     $dotproductOutput = (Threads::execute($a,$b,"dot"));
-        // //}
+        
+        $dot_exec = __DIR__."/./dot";
+        
+        if (file_exists($dot_exec)) {
+            $return = self::CThreaded($a, $b,$dot_exec);
+            if ($return!==NULL) {
+                return $return;
+            }
+        }
 
-        // // for ($i=0; $i < $shapeA[0]; $i++) {
-        // //     $output[] = self::nthRowDotProduct($a, $b, $i);
-        // // }
-        // // // return $mt->dot($a,$b,6);
-        // return $dotproductOutput; 
+        return self::sequentialDotProduct($a, $b, $shapeA, $shapeB);
+
     }
+
+    private static function CThreaded($a, $b,$exec)
+    {
+        // Threads::init();
+        $shapeA = self::shape($a);
+        $shapeB = self::shape($b);
+
+        if (end($shapeA) !== $shapeB[0]) {
+            throw new Exception("Shapes " . implode(",", $shapeA) . " and " . implode(",", $shapeB) . " not aligned.");
+        }
+
+        $array = ["a"=>$a,"b"=>$b];
+        $jsonFile = self::findAvailableJsonFileName();
+        $outputJsonFile = self::findAvailableJsonFileName();
+        
+        file_put_contents($jsonFile,json_encode($array));
+        $jsonData = NULL;
+        if(\SystemOperations::executeAndFetchJson($exec, $jsonFile,$outputJsonFile)){
+            $jsonContent = file_get_contents($outputJsonFile);
+            $jsonData = json_decode($jsonContent, true);
+        }
+        
+        if (file_exists($outputJsonFile)){
+            unlink($outputJsonFile);
+        }
+
+        if (file_exists($jsonFile)){
+            unlink($jsonFile);
+        }
+
+        if ($jsonData) {
+            return $jsonData;
+        }
+
+        return null;
+    }
+
+    private static function generateunid(){
+        return uniqid('file_dot_', true);
+    }
+
+private static function findAvailableJsonFileName() {
+    $tempDir = sys_get_temp_dir(); // Get the system temporary directory
+
+    while (true) {
+        $fileName = self::generateunid() . self::$counter . ".json"; // Generate a file name using the static counter
+        $fullPath = $tempDir . DIRECTORY_SEPARATOR . $fileName; // Create the full path
+
+        // Check if the file name already exists
+        if (!file_exists($fullPath)) {
+            return $fullPath; // Return the first available name
+        }
+
+        self::$counter++; // Increment static counter for the next iteration
+    }
+}
 
 
 public static function nthRowDotProduct($leftMatrix, $rightMatrix, $nthRow) {
@@ -1179,11 +1236,34 @@ public static function exp($input_array) {
 }
 
 
-public static function add($matrix1, $matrix2)
+
+
+public static function add($matrix1, $matrix2,$threaded = true)
 {
+
     // If matrix1 is scalar and matrix2 is matrix, swap them
     if ((is_int($matrix1) || is_float($matrix1)) && is_array($matrix2)) {
         list($matrix1, $matrix2) = [$matrix2, $matrix1];
+    }
+    
+    $threaded = false; # Override, overhead for this basic operation defeats the purpose 
+    if (is_array($matrix1) && is_array($matrix2)&&$threaded){
+        $shapeA = self::shape($matrix1);
+        $shapeB = self::shape($matrix2);
+
+        if ($shapeA !== $shapeB) {
+            throw new Exception("Shapes " . implode(",", $shapeA) . " and " . implode(",", $shapeB) . " are not aligned for addition.");
+        }
+
+        $add_exec = __DIR__."/./add";
+            
+        if (file_exists($add_exec)) {
+            $return = self::CThreaded($matrix1, $matrix2,$add_exec);
+            if ($return!==NULL) {
+                return $return;
+            }
+        }
+
     }
 
     // Initialize result array
@@ -1572,6 +1652,38 @@ private static function reshapeArray($array, $shape) {
 }
 
 
+public static function jacobiansdfsdf_matrix($output, $dvalues) {
+    // Check if output is 1D or 2D and handle accordingly
+
+
+    $is_1D = !is_array($output[0]);
+    if ($is_1D) {
+        $output = [$output];
+        $dvalues = [$dvalues];
+    }
+
+    $dinputs = [];
+    $size = count($output[0]);
+
+    // Loop through each pair of output and dvalues
+    foreach ($output as $i => $single_output) {
+        $single_dvalues = $dvalues[$i];
+
+        // Compute the Jacobian matrix and its dot product with single_dvalues in one go
+        $dot_product = array_fill(0, $size, 0);
+        for ($row = 0; $row < $size; $row++) {
+            for ($col = 0; $col < $size; $col++) {
+                // Calculate Jacobian value and multiply with dvalue at $col, then add to dot product at $row
+                $jacobian_value = ($row === $col ? 1 : 0) - $single_output[$row] * $single_output[$col];
+                $dot_product[$row] += $jacobian_value * $single_dvalues[$col];
+            }
+        }
+
+        $dinputs[] = $dot_product;
+    }
+
+    return $is_1D ? $dinputs[0] : $dinputs;
+}
 
 
 public static function jacobian_matrix($output, $dvalues) {

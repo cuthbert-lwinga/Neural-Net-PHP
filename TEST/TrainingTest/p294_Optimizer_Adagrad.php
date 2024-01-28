@@ -30,7 +30,7 @@ for ($epoch = 0; $epoch <= 10000; $epoch++) {
 	$dense1->forward($X);
 	$activation1->forward($dense1->output);
 	$dense2->forward($activation1->output);
-	$loss = $loss_activation->forward($dense2->output, $y)[0];
+	$loss = $loss_activation->forward($dense2->output, $y,false);
 	$predictions = NumpyLight::accuracy($loss_activation->output, $y);
 	
 	if (($epoch%100==0)) {

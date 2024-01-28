@@ -110,7 +110,7 @@ $Model->set(
 
 $Model->finalize();
 
-$Model->train($X, $y,$epoch = 200, $batch_size = 128,$print_every = 100,$validation_data = $validation);
+$Model->train($X, $y,$epoch = 1000, $batch_size = 128,$print_every = 100,$validation_data = $validation);
 
 
 $Model->save("fashion_mnist_model");
