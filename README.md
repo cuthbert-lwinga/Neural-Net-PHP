@@ -143,9 +143,7 @@ echo "✅ Model saved and loaded successfully. Ready for more action!\n";
 
 ## Performance Enhancement with C++ Integration 🚀🔧
 
-### Major Update: Threading with C++
-
-I'm thrilled to share a significant performance enhancement that I've brought to Neural-Net-PHP: by integrating C++ and enabling threading, I've managed to significantly boost computation speeds. The latest benchmarks show that threading has dramatically decreased the time it takes to perform matrix dot product operations, which is a game changer for processing efficiency in neural network computations.
+I'm thrilled to share a significant performance enhancement that I've brought to Neural-Net-PHP: by integrating C++ and enabling threading, I've managed to significantly boost computation speeds. The latest benchmarks show that threading has dramatically decreased the time it takes to perform matrix dot product operations, which is a game changer for processing efficiency in neural network computations, and makes this whole package more applicable for real life scenarios.
 
 ### Setting Up for Optimal Performance
 
